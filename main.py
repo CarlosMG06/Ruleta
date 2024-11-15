@@ -1,3 +1,4 @@
+import random
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
@@ -13,6 +14,9 @@ BLUE  = (0, 0, 255)
 PURPLE = (128, 0, 128)
 ORANGE = (255, 165, 0) 
 BROWN = (153, 102, 51)
+
+spin_angle_offset = 0
+spin_speed = random.randrange(18000,22000)/100
 
 red_numbers = [3, 6, 7, 8, 12, 14, 16, 17, 19, 21, 22, 25, 26, 28, 31, 33, 34, 36]
 
@@ -48,18 +52,27 @@ def app_events():
 
 # Fer càlculs
 def app_run():
-    pass
+    global spin_angle_offset, spin_speed
+    delta_time = clock.get_time() / 1000.0
+    acc = -50
+    if spin_speed > 0: spin_speed += acc * delta_time
+    spin_angle_offset += spin_speed * delta_time
 
 # Dibuixar
 def app_draw():
     # Pintar el fons de blanc
     screen.fill(WHITE)
 
+    draw_roulette()
+
+    # Actualitzar el dibuix a la finestra
+    pygame.display.update()
+
+def draw_roulette():
     pygame.draw.circle(screen, BLACK, (180,180), 150, 5)
     pygame.draw.circle(screen, BROWN, (180,180), 100)
-    
     for n in range(37):
-        angle = 360/37*n
+        angle = 360/37*n + spin_angle_offset
         if n == 0:
             color = GREEN
         elif n in red_numbers:
@@ -93,10 +106,6 @@ def app_draw():
         text_n_rotated_rect = text_n_rotated.get_rect()
         text_n_rotated_rect.center = center
         screen.blit(text_n_rotated, text_n_rotated_rect)
-    
-
-    # Actualitzar el dibuix a la finestra
-    pygame.display.update()
 
 if __name__ == "__main__":
     main()
