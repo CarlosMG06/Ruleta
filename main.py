@@ -14,13 +14,15 @@ PURPLE = (128, 0, 128)
 ORANGE = (255, 165, 0) 
 BROWN = (153, 102, 51)
 
-red_numbers = [3, 6, 7, 8, 12, 14, 16, 17, 19, 21, 22, 25, 26, 31, 32, 33, 34, 36]
+red_numbers = [3, 6, 7, 8, 12, 14, 16, 17, 19, 21, 22, 25, 26, 28, 31, 33, 34, 36]
 
 pygame.init()
 clock = pygame.time.Clock()
 
 screen = pygame.display.set_mode((640, 480))
 pygame.display.set_caption('Window Title')
+
+fontBold = pygame.font.SysFont("Arial", 16, bold=True)
 
 # Bucle de l'aplicació
 def main():
@@ -79,9 +81,18 @@ def app_draw():
             (int(prev_0["x"]), int(prev_0["y"]))
         ]
 
-        
+        center = (int((p0["x"]+prev_1["x"])/2), int((p0["y"]+prev_1["y"])/2))
+    
+
         pygame.draw.polygon(screen, color, points)
-        pygame.draw.polygon(screen, GRAY, points, 5)
+        pygame.draw.polygon(screen, GRAY, points, 3)
+
+        text_angle = -angle - 90 + 360/37/2
+        text_n = fontBold.render(str(n), True, WHITE)
+        text_n_rotated = pygame.transform.rotate(text_n, text_angle)
+        text_n_rotated_rect = text_n_rotated.get_rect()
+        text_n_rotated_rect.center = center
+        screen.blit(text_n_rotated, text_n_rotated_rect)
     
 
     # Actualitzar el dibuix a la finestra
