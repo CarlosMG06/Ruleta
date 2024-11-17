@@ -24,7 +24,10 @@ BROWN = (102, 68, 34)
 roulette = {"center": (180,180), "radius": 150,
 "angle_offset": 360/37/2, "spin_speed": 0, "spin_acc": -100,
 "about_to_spin": False, "spinning": False, "stopped_spinning": False}
-red_numbers = [3, 6, 7, 8, 12, 14, 16, 17, 19, 21, 22, 25, 26, 28, 31, 33, 34, 36]
+number_order = [
+    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27,
+    13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 
+    20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26]
 mouse = {"x": -1, "y": -1, 
 "pressed": False, "held": False, "released": False}
 spin_button = {"x": 140, "y": 400, "width": 80, "height": 30}
@@ -138,11 +141,11 @@ def draw_roulette():
     pygame.draw.circle(screen, DARK_GOLD, c, r+5, 5)
     pygame.draw.circle(screen, BROWN, c, r-50)
     pygame.draw.polygon(screen, GOLD, [(338,180),(353,188),(353,172)])
-    for n in range(37):
-        angle = (360/37*n + roulette["angle_offset"]) % 360
-        if n == 0:
+    for i, n in enumerate(number_order):
+        angle = (360/37*i + roulette["angle_offset"]) % 360
+        if i == 0:
             color = GREEN
-        elif n in red_numbers:
+        elif i % 2 == 1:
             color = RED
         else:
             color = BLACK
