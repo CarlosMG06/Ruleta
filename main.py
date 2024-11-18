@@ -1,21 +1,21 @@
+import math
+import random
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import sys
-import json
+import utils
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE  = (0, 0, 255)
-PURPLE = (128, 0, 128)
-ORANGE = (255, 165, 0) 
+from UI import *
+from Game import *
+
+mouse = {"x": -1, "y": -1, 
+"pressed": False, "held": False, "released": False}
 
 pygame.init()
 clock = pygame.time.Clock()
 
-screen = pygame.display.set_mode((640, 480))
+screen = pygame.display.set_mode((800, 450))
 pygame.display.set_caption('Window Title')
 
 # Parámetros partida
@@ -27,8 +27,8 @@ resultats = []
 def main():
     is_looping = True
 
-    # Inicia jugadores
-    init_jugadors()
+    update_roulette()
+    init_grid_surface()
 
     while is_looping:
         is_looping = app_events()
@@ -49,57 +49,69 @@ def app_events():
         # Posición del mouse
         # Click pulsado
         # Click soltado
+        elif event.type == pygame.MOUSEMOTION:
+            mouse["x"], mouse["y"] = event.pos
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse["pressed"] = True
+            mouse["held"] = True
+        elif event.type == pygame.MOUSEBUTTONUP:
+            mouse["held"] = False
+            mouse["released"] = True
     return True
 
 # Fer càlculs
 def app_run():
-    pass
+    delta_time = clock.get_time() / 1000.0
+    
+    if utils.is_point_in_rect(mouse, spin_button) and not roulette["spinning"]:
+        if mouse["pressed"]:
+            # La ruleta gira una miqueta com a anticipació per fer efecte
+            roulette["spin_speed"] = -50
+            roulette["about_to_spin"] = True
+        if mouse["released"] and roulette["about_to_spin"]:
+            acc = abs(roulette["spin_acc"])
+            angular_displacement = (54 + random.randint(1,37)) * 360/37 #Gira entre 55 i 91 números
+            roulette["spin_speed"] = math.sqrt(angular_displacement*2/acc)*acc #Càlcul MCUA
+            roulette["spinning"] = True
+            roulette["about_to_spin"] = False
+    elif roulette["about_to_spin"]:
+        # Si el mouse es mou fora del botó abans de deixar anar, la ruleta torna a la seva posició inicial
+        roulette["spin_speed"] = math.sqrt((-50)**2 - roulette["spin_speed"]**2) #Càlcul MCUA
+        roulette["about_to_spin"] = False
+        roulette["spin_canceled"] = True
 
-    # Reorganizamos fichas de jugadores, 'per tal que, amb el crèdit disponible, hi hagi la màxima varietat de valors de fitxe possible.'
+    if roulette["spin_speed"] != 0:
+        spin_roulette(delta_time)
+    elif roulette["readjusting"]:
+        readjust_roulette()
+        spin_counter["n"] += 1
 
-    # IF estamos en 'Modo Ruleta'
-
-        # Si hay dinero apostado y se aprieta botón de apostar, hace apuesta
-        # Se añade la información de la tirada al array 'resultats': Para cada jugador --> (resultado numérico de la apuesta, crédito después de tirada, cuánto ha apostado jugador)
-
-    # ELIF estamos en 'Modo Estadísticas'
-
-        # Modifica valor de scroll si se está moviendo
-
-    # Comprueba si partida ha acabado
-
+    mouse["pressed"] = False
+    mouse["released"] = False
+        
 # Dibuixar
 def app_draw():
-    # Pintar el fons de blanc
-    screen.fill(WHITE)
+    # Pintar el fons de verd fosc
+    screen.fill(DARK_GREEN)
 
-    # Dibuja ruleta o estadísticas
-    '''Dependiendo del valor de una variable, en la misma zona de la pantalla se muestra la ruleta o un listado de estadísticas.'''
+    if roulette["readjusting"]:
+        # Actualitzar número actual després de girar la ruleta
+        update_current_number()
+    if any([roulette["about_to_spin"], roulette["spin_canceled"], roulette["spinning"], roulette["readjusting"]]):
+        # Actualitzar la ruleta quan està girant
+        update_roulette()
+    elif spin_counter["n"] > 0:
+        # Dibuixar el número actual si la ruleta no està girant i s'ha girat una vegada com a mínim
+        screen.blit(current_number_text["text"], current_number_text["rect"])
+    # Dibuixar la ruleta
+    screen.blit(roulette_surface, roulette["position"])
 
-    # Dibuja sección jugadores
+    draw_spin_button()
 
-    # Dibuja sección banca
-
-    # Dibuja secciones apuestas
-
-    # Dibuja Fichas
-    '''Fichas estáticas en pantalla + Fichas en movimiento (si las hay)'''
+    draw_board()
 
     # Actualitzar el dibuix a la finestra
     pygame.display.update()
-
-def init_jugadors():
-    '''Inicia el diccionario que contiene información de los jugadores.'''
-    global jugadors
-    jugadors = {}
-    for nom_jugador in noms_jugadors:
-        dict_jugador = {}
-        for ficha in fichas_iniciales:
-            nom_ficha = f'{ficha[0]:03}'
-            valor_ficha = ficha[1]
-            dict_jugador[nom_ficha] = valor_ficha
-        jugadors[nom_jugador] = dict_jugador
     
-
 if __name__ == "__main__":
     main()
