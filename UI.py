@@ -142,9 +142,9 @@ def init_grid_surface():
             y -= c_h
         draw.line(grid_surface, LIGHT_GRAY, (x, 0), (x, y), 3)
 
-def draw_board():
+def update_board():
     # Abreujar noms
-    board_x, board_y, table_x = board["x"], board["y"], board["table_x"]
+    table_x = board["table_x"]
     cols, rows = board["columns"], board["rows"]
     c_w, c_h = board["cell"]["width"], board["cell"]["height"]
     
@@ -187,5 +187,3 @@ def draw_board():
         draw.lines(board_surface, LIGHT_GRAY, False, points, 3)
 
     #draw_bets()
-
-    screen.blit(board_surface, (board_x, board_y))

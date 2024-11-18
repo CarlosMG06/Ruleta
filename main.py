@@ -100,7 +100,11 @@ def app_draw():
 
     draw_spin_button()
 
-    draw_board()
+    if not any([roulette["about_to_spin"], roulette["spin_canceled"], roulette["spinning"], roulette["readjusting"]]):
+        # Actualitzar taula si la ruleta no està girant
+        update_board()
+    # Dibuixar taula
+    screen.blit(board_surface, (board["x"], board["y"]))
 
     # Actualitzar el dibuix a la finestra
     pygame.display.update()
