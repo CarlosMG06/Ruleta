@@ -100,11 +100,12 @@ def app_run():
     
     if utils.is_point_in_rect(mouse, spin_button) and not roulette["spinning"]:
         if mouse["pressed"]:
+            # La ruleta gira una miqueta com a anticipació per fer efecte
             roulette["spin_speed"] = -50
             roulette["about_to_spin"] = True
         if mouse["released"] and roulette["about_to_spin"]:
             acc = abs(roulette["spin_acc"])
-            angular_displacement = random.randint(540,900) #Gira entre 540 i 900 graus
+            angular_displacement = random.randint(541,900) #Gira entre 1.5 i 2.5 revolucions
             roulette["spin_speed"] = math.sqrt(angular_displacement*2/acc)*acc #Càlcul MCUA
             roulette["spinning"] = True
             roulette["about_to_spin"] = False
@@ -145,7 +146,7 @@ def adjust_roulette():
         sign = -1
     if abs(adjustment) > 360/37/10:
         roulette["spin_speed"] = sign * math.sqrt(200 * abs(adjustment))
-        
+ 
 # Dibuixar
 def app_draw():
     # Pintar el fons de blanc
