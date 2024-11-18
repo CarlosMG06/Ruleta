@@ -27,7 +27,4 @@ def readjust_roulette():
         sign = 1
     else:
         sign = -1
-    if abs(adjustment) > 360/37/10:
-        roulette["spin_speed"] = sign * math.sqrt(200 * abs(adjustment))
-    else:
-        roulette["spin_speed"] = 0.1
+    roulette["spin_speed"] = sign * math.sqrt(200 * abs(adjustment))
