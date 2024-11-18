@@ -26,15 +26,20 @@ number_order = [
     13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 
     20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26]
 
-roulette = {"center": (160,160), "radius": 144,
+roulette = {"position": (10,10), "radius": 150,
 "angle_offset": 360/37/2, "spin_speed": 0, "spin_acc": -100,
-"about_to_spin": False, "spinning": False, "stopped_spinning": False}
+"about_to_spin": False, "spin_canceled": False, "spinning": False, "readjusting": False}
+
+roulette_surface = pygame.Surface((roulette["radius"]*2 + 40,roulette["radius"]*2))
+roulette_surface.fill(DARK_GREEN)
 
 current_number = 0
 
+spin_counter = 0
+
 spin_button = {
-    "x": roulette["center"][0] - 40,
-    "y": roulette["center"][1] + roulette["radius"] * 1.5 - 15,
+    "x": roulette["position"][0] + roulette["radius"] - 40,
+    "y": roulette["position"][1] + roulette["radius"] * 2.5 - 15,
     "width": 80, "height": 30}
 
 board = {"x": 350, "y": 20, "columns": 4, "rows": 12, "table_x": 50,
@@ -66,7 +71,8 @@ font_serif = pygame.font.SysFont("Times New Roman", 21)
 def main():
     is_looping = True
 
-    init_table_surface()
+    update_roulette()
+    init_grid_surface()
 
     while is_looping:
         is_looping = app_events()
@@ -113,13 +119,15 @@ def app_run():
         # Si el mouse es mou fora del botó abans de deixar anar, la ruleta torna a la seva posició inicial
         roulette["spin_speed"] = math.sqrt((-50)**2 - roulette["spin_speed"]**2) #Càlcul MCUA
         roulette["about_to_spin"] = False
+        roulette["spin_canceled"] = True
 
     if roulette["spin_speed"] != 0:
         spin_roulette(delta_time)
-    elif roulette["stopped_spinning"]:
-        adjust_roulette()
-        roulette["stopped_spinning"] = False
-    
+    elif roulette["readjusting"]:
+        readjust_roulette()
+        global spin_counter
+        spin_counter += 1
+
     mouse["pressed"] = False
     mouse["released"] = False
 
@@ -131,13 +139,17 @@ def spin_roulette(delta_time):
     else:
         if roulette["spinning"]:
             roulette["spinning"] = False 
-            roulette["stopped_spinning"] = True
+            roulette["readjusting"] = True
+        elif roulette["readjusting"]:
+            roulette["readjusting"] = False
+        elif roulette["spin_canceled"]:
+            roulette["spin_canceled"] = False
         roulette["angle_offset"] %= 360
         roulette["spin_speed"] = 0
     roulette["angle_offset"] += roulette["spin_speed"] * delta_time
 
-# Ajustar la ruleta després de girar per alinear el número que ha sortit amb la fletxa
-def adjust_roulette():
+# Ajustar la ruleta després de girar per tornar a alinear la casella amb la fletxa
+def readjust_roulette():
     adjustment = (roulette["angle_offset"] - 360/37/2) % (360/37)
     if adjustment >= 360/37/2:
         adjustment -= 360/37
@@ -146,15 +158,29 @@ def adjust_roulette():
         sign = -1
     if abs(adjustment) > 360/37/10:
         roulette["spin_speed"] = sign * math.sqrt(200 * abs(adjustment))
+    else:
+        roulette["readjusting"] = False
  
 # Dibuixar
 def app_draw():
-    # Pintar el fons de blanc
+    # Pintar el fons de verd fosc
     screen.fill(DARK_GREEN)
 
-    draw_spin_button()
+    # Número actual
+    text = font_medium.render(f"Current number: {str(current_number)}", True, WHITE)
+    text_center = (roulette["position"][0] + roulette["radius"], roulette["position"][1] + roulette["radius"]*2 + 20)
+    text_rect = text.get_rect(center = text_center)
 
-    draw_roulette()
+    if any([roulette["about_to_spin"], roulette["spinning"], roulette["readjusting"], roulette["spin_canceled"]]):
+        # Actualitzar la ruleta quan està girant
+        update_roulette()
+    elif spin_counter > 0:
+        # Dibuixar el número actual si la ruleta no està girant i s'ha girat una vegada com a mínim
+        screen.blit(text, text_rect)
+    # Dibuixar la ruleta
+    screen.blit(roulette_surface, roulette["position"])
+
+    draw_spin_button()
 
     draw_board()
 
@@ -171,7 +197,7 @@ def draw_spin_button():
         fill_color = GOLD
         border_color = BLACK
         text_color = BLACK
-    elif roulette["spinning"]:
+    elif roulette["spinning"] or roulette["readjusting"] or roulette["spin_canceled"]:
         fill_color = DARK_GRAY
         border_color = GRAY
         text_color = GRAY
@@ -180,22 +206,22 @@ def draw_spin_button():
     pygame.draw.rect(screen, border_color, sb_rect_tuple, 2)
     
     sb_text = font_medium.render("Spin!", True, text_color)
-    center = (roulette["center"][0], roulette["center"][1] + roulette["radius"] * 1.5)
+    center = (spin_button["x"] + 40, spin_button["y"] + 15)
     sb_text_rect = sb_text.get_rect(center=center)
     screen.blit(sb_text, sb_text_rect)
 
-def draw_roulette():
-    c = roulette["center"]
+def update_roulette():
     r = roulette["radius"]
+    c = (r,r)
 
-    pygame.draw.circle(screen, DARK_GOLD, c, r+5, 5)
-    pygame.draw.circle(screen, BROWN, c, r-50)
+    pygame.draw.circle(roulette_surface, DARK_GOLD, c, r, 6)
+    pygame.draw.circle(roulette_surface, BROWN, c, r-56)
     
     arrow_points = [
     (c[0]+r+8, c[1]),
     (c[0]+r+23, c[1]+8),
     (c[0]+r+23, c[1]-8)]
-    pygame.draw.polygon(screen, GOLD, arrow_points)
+    pygame.draw.polygon(roulette_surface, GOLD, arrow_points)
     
     for i, n in enumerate(number_order):
         angle = (360/37*i + roulette["angle_offset"]) % 360
@@ -206,20 +232,20 @@ def draw_roulette():
         else:
             color = BLACK
         
-        p0 = utils.point_on_circle(c, r-24, angle)
-        p1 = utils.point_on_circle(c, r, angle)
+        p0 = utils.point_on_circle(c, r-30, angle)
+        p1 = utils.point_on_circle(c, r-6, angle)
 
         prev_angle = angle - 360/37
-        prev_0 = utils.point_on_circle(c, r-24, prev_angle)
-        prev_1 = utils.point_on_circle(c, r, prev_angle)
+        prev_0 = utils.point_on_circle(c, r-30, prev_angle)
+        prev_1 = utils.point_on_circle(c, r-6, prev_angle)
 
-        if roulette["spin_speed"] == 0 and not roulette["about_to_spin"] and prev_angle + angle < 360/37:
+        if roulette["spin_speed"] == 0 and prev_angle + angle < 360/37:
             global current_number
             current_number = n
 
         points = [p0,p1,prev_1,prev_0]
-        pygame.draw.polygon(screen, color, points)
-        pygame.draw.polygon(screen, LIGHT_GRAY, points, 3)
+        pygame.draw.polygon(roulette_surface, color, points)
+        pygame.draw.polygon(roulette_surface, LIGHT_GRAY, points, 3)
 
         polygon_center = (int((p0[0]+prev_1[0])/2), int((p0[1]+prev_1[1])/2))
 
@@ -228,13 +254,9 @@ def draw_roulette():
         text_n_rotated = pygame.transform.rotate(text_n, text_angle)
         text_n_rotated_rect = text_n_rotated.get_rect()
         text_n_rotated_rect.center = polygon_center
-        screen.blit(text_n_rotated, text_n_rotated_rect)
+        roulette_surface.blit(text_n_rotated, text_n_rotated_rect)
 
-    text_number = font_medium.render(f"Current number: {str(current_number)}", True, WHITE)
-    text_number_rect = text_number.get_rect(center = (c[0], c[1]+r+20))
-    screen.blit(text_number, text_number_rect)
-
-def init_table_surface():
+def init_grid_surface():
     # Abreujar noms
     cols, rows = board["columns"], board["rows"]
     c_w, c_h = board["cell"]["width"], board["cell"]["height"]
