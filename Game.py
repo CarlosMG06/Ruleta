@@ -103,9 +103,11 @@ def init_chips():
             chip_dict = {}
             chip_dict['value'] = int(chip)
             chip_dict['propietary'] = player_name
-            chip_dict('pos') = {'x': 0, 'y': 0} # Necesito saber en qué posición van las fichas de X valor, para cada jugador
+            chip_dict['pos'] = {'x': 0, 'y': 0} # Necesito saber en qué posición van las fichas de X valor, para cada jugador
             chip_dict['dragged'] = False
         chips.append(chip_dict)
+
+
 
 if __name__ == '__main__':
     pass
