@@ -92,17 +92,18 @@ def app_draw():
     if any([roulette["about_to_spin"], roulette["spin_canceled"], roulette["spinning"], roulette["readjusting"]]):
         # Actualitzar la ruleta quan està girant
         update_roulette()
-    elif spin_counter["n"] > 0:
-        # Dibuixar el número actual si la ruleta no està girant i s'ha girat una vegada com a mínim
-        screen.blit(current_number_text["text"], current_number_text["rect"])
+    else:
+        # Actualitzar taula si la ruleta no està girant
+        update_board()
+        if spin_counter["n"] > 0:
+            # Dibuixar el número actual si la ruleta no està girant i s'ha girat una vegada com a mínim
+            screen.blit(current_number_text["text"], current_number_text["rect"])
     # Dibuixar la ruleta
     screen.blit(roulette_surface, roulette["position"])
 
+    #Dibuixar botó de gir
     draw_spin_button()
-
-    if not any([roulette["about_to_spin"], roulette["spin_canceled"], roulette["spinning"], roulette["readjusting"]]):
-        # Actualitzar taula si la ruleta no està girant
-        update_board()
+       
     # Dibuixar taula
     screen.blit(board_surface, (board["x"], board["y"]))
 
