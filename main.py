@@ -111,7 +111,7 @@ def app_run():
             roulette["about_to_spin"] = True
         if mouse["released"] and roulette["about_to_spin"]:
             acc = abs(roulette["spin_acc"])
-            angular_displacement = random.randint(541,900) #Gira entre 1.5 i 2.5 revolucions
+            angular_displacement = (54 + random.randint(1,37)) * 360/37 #Gira entre 55 i 91 números
             roulette["spin_speed"] = math.sqrt(angular_displacement*2/acc)*acc #Càlcul MCUA
             roulette["spinning"] = True
             roulette["about_to_spin"] = False
