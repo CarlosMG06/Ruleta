@@ -24,6 +24,7 @@ def main():
 
     update_roulette()
     init_grid_surface()
+    init_players()
 
     while is_looping:
         is_looping = app_events()
@@ -41,6 +42,9 @@ def app_events():
     for event in pygame.event.get():
         if event.type == pygame.QUIT: # Botó tancar finestra
             return False
+        # Posición del mouse
+        # Click pulsado
+        # Click soltado
         elif event.type == pygame.MOUSEMOTION:
             mouse["x"], mouse["y"] = event.pos
         elif event.type == pygame.MOUSEBUTTONDOWN:
