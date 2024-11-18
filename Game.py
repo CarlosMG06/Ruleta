@@ -107,6 +107,8 @@ def init_chips():
             chip_dict['dragged'] = False
         chips.append(chip_dict)
 
+
+
 if __name__ == '__main__':
     pass
     
