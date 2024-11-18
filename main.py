@@ -18,17 +18,13 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((800, 450))
 pygame.display.set_caption('Window Title')
 
-# Parámetros partida
-noms_jugadors = ['taronja','lila','blau']
-fichas_iniciales = [(100,0),(50,1),(20,1),(10,2),(5,2)] # Las tuplas son: (NomFicha, Cantidad)
-resultats = []
-
 # Bucle de l'aplicació
 def main():
     is_looping = True
 
     update_roulette()
     init_grid_surface()
+    init_players()
 
     while is_looping:
         is_looping = app_events()
