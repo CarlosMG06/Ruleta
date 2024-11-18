@@ -6,13 +6,15 @@ import utils
 import math
 
 font.init()
-font_small = font.SysFont("Arial", 15, bold=True)
-font_medium = font.SysFont("Arial", 18, bold=True)
-font_big = font.SysFont("Arial", 27, bold=True)
+font_tiny = font.SysFont("Arial", 10, bold=True)
+font_small = font.SysFont("Arial", 12, bold=True)
+font_medium = font.SysFont("Arial", 15, bold=True)
+font_big = font.SysFont("Arial", 18, bold=True)
+font_huge = font.SysFont("Arial", 27, bold=True)
 font_serif = font.SysFont("Times New Roman", 21)
 
 def update_current_number():
-    text = font_medium.render(f"Current number: {str(current_number["n"])}", True, WHITE)
+    text = font_big.render(f"Current number: {str(current_number["n"])}", True, WHITE)
     text_center = (roulette["position"][0] + roulette["radius"], roulette["position"][1] + roulette["radius"]*2 + 20)
     text_rect = text.get_rect(center = text_center)
     current_number_text["text"], current_number_text["rect"] = text, text_rect
@@ -35,7 +37,7 @@ def draw_spin_button():
     draw.rect(screen, fill_color, sb_rect_tuple)
     draw.rect(screen, border_color, sb_rect_tuple, 2)
     
-    sb_text = font_medium.render("Spin!", True, text_color)
+    sb_text = font_big.render("Spin!", True, text_color)
     center = (spin_button["x"] + 40, spin_button["y"] + 15)
     sb_text_rect = sb_text.get_rect(center=center)
     screen.blit(sb_text, sb_text_rect)
@@ -79,7 +81,7 @@ def update_roulette():
         polygon_center = (int((p0[0]+prev_1[0])/2), int((p0[1]+prev_1[1])/2))
 
         text_angle = -angle - 90 + 360/37/2
-        text_n = font_small.render(str(n), True, WHITE)
+        text_n = font_medium.render(str(n), True, WHITE)
         text_n_rotated = rotate(text_n, text_angle)
         text_n_rotated_rect = text_n_rotated.get_rect()
         text_n_rotated_rect.center = polygon_center
@@ -104,7 +106,7 @@ def init_grid_surface():
 
         center_x = x + c_w / 2 - 1
         center_y = y + c_h / 2
-        text_n = font_medium.render(str(n), True, WHITE)
+        text_n = font_big.render(str(n), True, WHITE)
         text_n_rotated =  rotate(text_n, 90)
         text_n_rotated_rect = text_n_rotated.get_rect(center=(center_x, center_y))
         grid_surface.blit(text_n_rotated, text_n_rotated_rect)
@@ -167,7 +169,7 @@ def update_board():
     (table_x, c_h * 3)]
     draw.lines(board_surface, LIGHT_GRAY, False, zero_points, 3)
 
-    text_zero = font_big.render("0", True, WHITE, DARK_GREEN)
+    text_zero = font_huge.render("0", True, WHITE, DARK_GREEN)
     text_zero_rotated = rotate(text_zero, 90)
     text_zero_rotated_rect = text_zero_rotated.get_rect(center = (table_x*5/9, c_h * 1.5))
     board_surface.blit(text_zero_rotated, text_zero_rotated_rect)
@@ -186,7 +188,7 @@ def update_board():
         y = c_h * col
         
         center = (x + c_w/2, y + c_h/2)
-        text = font_small.render("2 : 1", True, WHITE, DARK_GREEN)
+        text = font_medium.render("2 : 1", True, WHITE, DARK_GREEN)
         text_rotated = rotate(text, 90)
         text_rotated_rect = text_rotated.get_rect(center=center)
         board_surface.blit(text_rotated, text_rotated_rect)
@@ -207,3 +209,45 @@ def update_board():
         }
 
     #draw_bets()
+
+def draw_chip(chip_dict={"value": f"{50:03}", "owner": "banca", "pos": (600,400)}):
+    value = int(chip_dict["value"])
+    owner = chip_dict["owner"]
+    pos = chip_dict["pos"]
+    
+    match owner:
+        case "taronja": bg_color = ORANGE
+        case "blau": bg_color = BLUE
+        case "lila": bg_color = PURPLE
+        case "banca": bg_color = WHITE
+    color = (bg_color[0]/2, bg_color[1]/2, bg_color[2]/2)
+
+    radius = 5 + int(math.log2(value)*3)
+    draw.circle(screen, bg_color, pos, radius)
+
+    text_font = font_medium if value >= 50 else font_small
+    text = text_font.render(str(value), True, color)
+    text_rect = text.get_rect(center=pos)
+    screen.blit(text, text_rect)
+
+    for i in range(8):    
+        angle = 360/8 * (i + 0.25)
+        p0 = utils.point_on_circle(pos, radius*2/3, angle)
+        p1 = utils.point_on_circle(pos, radius-1, angle)
+
+        angle -= 360/8/2
+        p2 = utils.point_on_circle(pos, radius-1, angle)
+        p3 = utils.point_on_circle(pos, radius*2/3, angle)
+
+        polygon_color = LIGHT_GRAY if bg_color != WHITE and i % 2 == 0 else DARK_GRAY
+        points = [p0,p1,p2,p3]
+        draw.polygon(screen, polygon_color, points)  
+
+    border_width = 2
+    inner_border_width = 1
+    if value >= 50:
+        border_width += 1
+        inner_border_width += 1
+    draw.circle(screen, color, pos, radius, border_width)
+    draw.circle(screen, color, pos, radius*2/3, inner_border_width)   
+    

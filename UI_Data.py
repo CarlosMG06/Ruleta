@@ -13,9 +13,9 @@ DARK_GREEN = (0, 85, 17)
 GREEN = (0, 255, 0)
 GOLD = (255, 153, 0)
 DARK_GOLD = (102, 61, 0)
-#BLUE  = (0, 0, 255)
-#PURPLE = (153, 0, 255)
-#ORANGE = (255, 102, 0) 
+BLUE  = (0, 102, 255)
+PURPLE = (153, 0, 255)
+ORANGE = (255, 102, 0) 
 BROWN = (102, 68, 34)
 
 current_number_text = {"text": None, "rect": None}

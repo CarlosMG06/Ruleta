@@ -38,17 +38,17 @@ def init_players():
     global players
 
     # Parámetros partida
-    noms_jugadors = ['taronja','lila','blau']
-    fichas_iniciales = [(100,0),(50,1),(20,1),(10,2),(5,2)] # Las tuplas son: (NomFicha, Cantidad)
+    player_names = ['taronja','lila','blau']
+    starting_chips = [(100,0),(50,1),(20,1),(10,2),(5,2)] # Las tuplas son: (NomFicha, Cantidad)
     
     players = {}
-    for nom_jugador in noms_jugadors:
-        dict_jugador = {}
-        for ficha in fichas_iniciales:
-            nom_ficha = f'{ficha[0]:03}'
-            valor_ficha = ficha[1]
-            dict_jugador[nom_ficha] = valor_ficha
-        players[nom_jugador] = dict_jugador
+    for name in player_names:
+        player_dict = {}
+        for ficha in starting_chips:
+            chip_value = f'{ficha[0]:03}'
+            chip_amount = ficha[1]
+            player_dict[chip_value] = chip_amount
+        players[name] = player_dict
 
 def total_money_player(player_name):
     '''Devuelve el dinero total que tiene el jugador, a partir de sus fichas'''
@@ -93,8 +93,8 @@ def valid_chip_position(chip, slot_rect):
 def init_chips():
     '''Genera un array de diccionarios, donde cada diccionario contiene información de cada ficha.
     
-    La estructua de cada diccionario es:
-    {'propietary': str, 'value': int, 'pos': {'x': int, 'y': int}, 'dragged': bool}'''
+    La estructura de cada diccionario es:
+    {'owner': str, 'value': int, 'pos': {'x': int, 'y': int}, 'dragged': bool}'''
     global chips
     chips = []
 
@@ -102,8 +102,8 @@ def init_chips():
         for chip in players[player_name]:
             chip_dict = {}
             chip_dict['value'] = int(chip)
-            chip_dict['propietary'] = player_name
-            chip_dict('pos') = {'x': 0, 'y': 0} # Necesito saber en qué posición van las fichas de X valor, para cada jugador
+            chip_dict['owner'] = player_name
+            chip_dict['pos'] = {'x': 0, 'y': 0} # Necesito saber en qué posición van las fichas de X valor, para cada jugador
             chip_dict['dragged'] = False
         chips.append(chip_dict)
 
