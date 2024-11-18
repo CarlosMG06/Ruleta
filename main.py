@@ -14,11 +14,11 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 DARK_GREEN = (0, 85, 17)
 GREEN = (0, 255, 0)
-GOLD = (255, 128, 0)
-DARK_GOLD = (128, 64, 0)
+GOLD = (255, 153, 0)
+DARK_GOLD = (102, 61, 0)
 #BLUE  = (0, 0, 255)
-#PURPLE = (128, 0, 128)
-#ORANGE = (255, 165, 0) 
+#PURPLE = (153, 0, 255)
+#ORANGE = (255, 102, 0) 
 BROWN = (102, 68, 34)
 
 number_order = [
@@ -33,7 +33,7 @@ roulette = {"position": (10,10), "radius": 150,
 roulette_surface = pygame.Surface((roulette["radius"]*2 + 40,roulette["radius"]*2))
 roulette_surface.fill(DARK_GREEN)
 
-current_number = 0
+current_number = {"n": 0, "text": None, "rect": None}
 
 spin_counter = 0
 
@@ -159,24 +159,22 @@ def readjust_roulette():
     if abs(adjustment) > 360/37/10:
         roulette["spin_speed"] = sign * math.sqrt(200 * abs(adjustment))
     else:
-        roulette["readjusting"] = False
+        roulette["spin_speed"] = 0.1
  
 # Dibuixar
 def app_draw():
     # Pintar el fons de verd fosc
     screen.fill(DARK_GREEN)
 
-    # Número actual
-    text = font_medium.render(f"Current number: {str(current_number)}", True, WHITE)
-    text_center = (roulette["position"][0] + roulette["radius"], roulette["position"][1] + roulette["radius"]*2 + 20)
-    text_rect = text.get_rect(center = text_center)
-
-    if any([roulette["about_to_spin"], roulette["spinning"], roulette["readjusting"], roulette["spin_canceled"]]):
+    if roulette["readjusting"]:
+        # Actualitzar número actual després de girar la ruleta
+        update_current_number()
+    if any([roulette["about_to_spin"], roulette["spin_canceled"], roulette["spinning"], roulette["readjusting"]]):
         # Actualitzar la ruleta quan està girant
         update_roulette()
     elif spin_counter > 0:
         # Dibuixar el número actual si la ruleta no està girant i s'ha girat una vegada com a mínim
-        screen.blit(text, text_rect)
+        screen.blit(current_number["text"], current_number["rect"])
     # Dibuixar la ruleta
     screen.blit(roulette_surface, roulette["position"])
 
@@ -186,6 +184,12 @@ def app_draw():
 
     # Actualitzar el dibuix a la finestra
     pygame.display.update()
+
+def update_current_number():
+    text = font_medium.render(f"Current number: {str(current_number["n"])}", True, WHITE)
+    text_center = (roulette["position"][0] + roulette["radius"], roulette["position"][1] + roulette["radius"]*2 + 20)
+    text_rect = text.get_rect(center = text_center)
+    current_number["text"], current_number["rect"] = text, text_rect
 
 def draw_spin_button():
     sb_rect_tuple = (spin_button["x"],spin_button["y"],spin_button["width"],spin_button["height"])
@@ -197,7 +201,7 @@ def draw_spin_button():
         fill_color = GOLD
         border_color = BLACK
         text_color = BLACK
-    elif roulette["spinning"] or roulette["readjusting"] or roulette["spin_canceled"]:
+    elif roulette["spin_canceled"] or roulette["spinning"] or roulette["readjusting"]:
         fill_color = DARK_GRAY
         border_color = GRAY
         text_color = GRAY
@@ -240,8 +244,7 @@ def update_roulette():
         prev_1 = utils.point_on_circle(c, r-6, prev_angle)
 
         if roulette["spin_speed"] == 0 and prev_angle + angle < 360/37:
-            global current_number
-            current_number = n
+            current_number["n"] = n
 
         points = [p0,p1,prev_1,prev_0]
         pygame.draw.polygon(roulette_surface, color, points)
