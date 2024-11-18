@@ -109,24 +109,34 @@ def init_grid_surface():
         text_n_rotated_rect = text_n_rotated.get_rect(center=(center_x, center_y))
         grid_surface.blit(text_n_rotated, text_n_rotated_rect)
 
+        board_cell_areas[str(n)] = {"rect": {"x": x, "y": y, "width": c_w, "height": c_h}}
+
     # Cel·les inferiors
     for bottom_cell in range(4):
-        x = c_w * (1.5 + 3 * bottom_cell)
-        y = c_h * 3.5
+        x = c_w * 3 * bottom_cell
+        y = c_h * 3
+        center_x = x + c_w * 1.5
+        center_y = y + c_h * 0.5
+
         if bottom_cell in (0, 3):
             string = "EVEN" if bottom_cell == 0 else "ODD"
+            
             text = font_serif.render(string, True, WHITE)
-            text_rect = text.get_rect(center = (x, y))
+            text_rect = text.get_rect(center = (center_x, center_y))
             grid_surface.blit(text, text_rect)
         else:
-            color = RED if bottom_cell == 2 else BLACK
+            string = "RED" if bottom_cell == 2 else "BLACK"
+
+            color = RED if string == "RED" else BLACK
             diamond_points = [
-            (x - c_w * 1.2, y),
-            (x, y - c_h * 0.4),
-            (x + c_w * 1.2, y),
-            (x, y + c_h * 0.4)]
+            (x + c_w * 0.3, center_y),
+            (center_x, y + c_h * 0.1),
+            (x + c_w * 2.7, center_y),
+            (center_x, y + c_h * 0.9)]
             draw.polygon(grid_surface, color, diamond_points)
             draw.polygon(grid_surface, LIGHT_GRAY, diamond_points, 3)
+
+        board_cell_areas[string] = {"rect": {"x": x, "y": y, "width": c_w * 3, "height": c_h}}
 
     #Quadre extern
     draw.rect(grid_surface, LIGHT_GRAY, (0, 0, grid_size[0], grid_size[1]), 3)
@@ -145,7 +155,7 @@ def init_grid_surface():
 def update_board():
     # Abreujar noms
     table_x = board["table_x"]
-    cols, rows = board["columns"], board["rows"]
+    rows = board["rows"]
     c_w, c_h = board["cell"]["width"], board["cell"]["height"]
     
     # Espai de zero
@@ -161,6 +171,11 @@ def update_board():
     text_zero_rotated = rotate(text_zero, 90)
     text_zero_rotated_rect = text_zero_rotated.get_rect(center = (table_x*5/9, c_h * 1.5))
     board_surface.blit(text_zero_rotated, text_zero_rotated_rect)
+
+    board_cell_areas["0"] = {
+        "rect": {"x": table_x*2/3, "y": 1, "width": table_x/3, "height": c_h * 3 - 1},
+        "tri1": zero_points[1:3], "tri2": zero_points[2:4]
+        }
 
     # Graella
     board_surface.blit(grid_surface, (table_x, 0))
@@ -185,5 +200,10 @@ def update_board():
         
         if col != 0: points.pop(0)
         draw.lines(board_surface, LIGHT_GRAY, False, points, 3)
+
+        board_cell_areas[f"col{col+1}"] = {
+            "rect": {"x": x, "y": y, "width": c_w * 0.9, "height": c_h - 1},
+            "tri1": points[1:3], "tri2": points[2:4]
+        }
 
     #draw_bets()

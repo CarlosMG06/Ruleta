@@ -50,3 +50,5 @@ grid_surface.fill(DARK_GREEN)
 board_size = (grid_size[0]+board["table_x"]+board["cell"]["width"]*1.5,grid_size[1])
 board_surface = Surface(board_size)
 board_surface.fill(DARK_GREEN)
+
+board_cell_areas = {}
