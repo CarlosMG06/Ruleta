@@ -108,7 +108,7 @@ def app_draw():
     #Dibuixar botó de gir
     draw_spin_button()
     
-    # temporal: prova per veure com són les fitxes
+    # temporal: prova per veure l'aparença de les fitxes i decidir la seva posició
     draw_chip(chip_dict={"value": f"{100:03}", "owner": "taronja", "pos": (500,400)})
     draw_chip(chip_dict={"value": f"{50:03}", "owner": "banca", "pos": (550,400)})
     draw_chip(chip_dict={"value": f"{20:03}", "owner": "lila", "pos": (600,400)})

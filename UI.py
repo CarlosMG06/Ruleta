@@ -14,6 +14,13 @@ font_huge = font.SysFont("Arial", 27, bold=True)
 font_serif = font.SysFont("Times New Roman", 21)
 
 def update_current_number():
+    for i, n in enumerate(number_order):
+        angle = (360/37*i + roulette["angle_offset"]) % 360
+        prev_angle = angle - 360/37
+        if angle + prev_angle < 360/37:
+            current_number["n"] = n
+            break
+    
     text = font_big.render(f"Current number: {str(current_number["n"])}", True, WHITE)
     text_center = (roulette["position"][0] + roulette["radius"], roulette["position"][1] + roulette["radius"]*2 + 20)
     text_rect = text.get_rect(center = text_center)
@@ -70,9 +77,6 @@ def update_roulette():
         prev_angle = angle - 360/37
         prev_0 = utils.point_on_circle(c, r-30, prev_angle)
         prev_1 = utils.point_on_circle(c, r-6, prev_angle)
-
-        if roulette["spin_speed"] == 0 and prev_angle + angle < 360/37:
-            current_number["n"] = n
 
         points = [p0,p1,prev_1,prev_0]
         draw.polygon(roulette_surface, color, points)
