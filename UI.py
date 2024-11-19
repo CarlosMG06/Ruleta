@@ -222,7 +222,7 @@ def draw_chip(chip_dict={"value": f"{50:03}", "owner": "banca", "pos": (600,400)
         case "banca": bg_color = WHITE
     color = (bg_color[0]/2, bg_color[1]/2, bg_color[2]/2)
 
-    radius = 5 + int(math.log2(value)*3)
+    radius = 6 + int(math.log2(value)*3)
     draw.circle(screen, bg_color, pos, radius)
 
     text_font = font_medium if value >= 50 else font_small
