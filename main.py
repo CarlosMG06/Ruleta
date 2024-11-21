@@ -156,6 +156,19 @@ def app_draw():
     # Dibuixar taula
     screen.blit(board_surface, (board["x"], board["y"]))
 
+    # Muestra regiones del tablero a partir de sus Rect
+    for board_cell in board_cell_areas:
+        color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
+        rect_values = (board_cell_areas[board_cell]['rect']['x'], board_cell_areas[board_cell]['rect']['y'], board_cell_areas[board_cell]['rect']['width'], board_cell_areas[board_cell]['rect']['height'])
+        pygame.draw.rect(screen, color, rect_values, 3)
+        if board_cell == '0':
+            punt_inici_1 = board_cell_areas[board_cell]['tri1'][0]
+            punt_final_1 = board_cell_areas[board_cell]['tri1'][1]
+            pygame.draw.line(screen, color, punt_inici_1, punt_final_1)
+            punt_inici_2 = board_cell_areas[board_cell]['tri2'][0]
+            punt_final_2 = board_cell_areas[board_cell]['tri2'][1]
+            pygame.draw.line(screen, color, punt_inici_2, punt_final_2)
+
     # Dibuixar fitxes
     for chip in chips:
         draw_chip(chip)

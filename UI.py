@@ -115,7 +115,7 @@ def init_grid_surface():
         text_n_rotated_rect = text_n_rotated.get_rect(center=(center_x, center_y))
         grid_surface.blit(text_n_rotated, text_n_rotated_rect)
 
-        board_cell_areas[str(n)] = {"rect": {"x": x, "y": y, "width": c_w, "height": c_h}}
+        board_cell_areas[str(n)] = {"rect": {"x": x + board['x'] + board['table_x'], "y": y + board['y'], "width": c_w, "height": c_h}}
 
     # Cel·les inferiors
     for bottom_cell in range(4):
@@ -142,7 +142,7 @@ def init_grid_surface():
             draw.polygon(grid_surface, color, diamond_points)
             draw.polygon(grid_surface, LIGHT_GRAY, diamond_points, 3)
 
-        board_cell_areas[string] = {"rect": {"x": x, "y": y, "width": c_w * 3, "height": c_h}}
+        board_cell_areas[string] = {"rect": {"x": x + board['x'] + board['table_x'], "y": y + board['y'], "width": c_w * 3, "height": c_h}}
 
     #Quadre extern
     draw.rect(grid_surface, LIGHT_GRAY, (0, 0, grid_size[0], grid_size[1]), 3)
@@ -178,8 +178,9 @@ def update_board():
     text_zero_rotated_rect = text_zero_rotated.get_rect(center = (table_x*5/9, c_h * 1.5))
     board_surface.blit(text_zero_rotated, text_zero_rotated_rect)
 
+    
     board_cell_areas["0"] = {
-        "rect": {"x": table_x*2/3, "y": 1, "width": table_x/3, "height": c_h * 3 - 1},
+        "rect": {"x": table_x*2/3 + board['x'], "y": 1 + board['y'], "width": table_x/3, "height": c_h * 3},
         "tri1": zero_points[1:3], "tri2": zero_points[2:4]
         }
 
@@ -207,10 +208,10 @@ def update_board():
         if col != 0: points.pop(0)
         draw.lines(board_surface, LIGHT_GRAY, False, points, 3)
 
-        board_cell_areas[f"col{col+1}"] = {
+        '''board_cell_areas[f"col{col+1}"] = {
             "rect": {"x": x, "y": y, "width": c_w * 0.9, "height": c_h - 1},
             "tri1": points[1:3], "tri2": points[2:4]
-        }
+        }'''
 
     #draw_bets()
 
@@ -223,7 +224,7 @@ def draw_chip(chip_dict={"value": f"{50:03}", "owner": "banca", "pos": (600,400)
     if type(chip_dict['pos']) is tuple:
         pos = chip_dict["pos"]
     else:
-        pos = tuple(chip_dict['pos'].values())
+        pos = tuple(chip_dict['pos'].values()) # Mantener esta linea!
     
     match owner:
         case "taronja": bg_color = ORANGE
