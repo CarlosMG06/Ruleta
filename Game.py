@@ -1,6 +1,5 @@
 from GameData import *
 from UI_Data import *
-from main import mouse, drag_offset
 import math
 import utils
 
@@ -51,6 +50,7 @@ def init_players():
             chip_amount = ficha[1]
             player_dict[chip_value] = chip_amount
         players[name] = player_dict
+    return players
 
 def total_money_player(player_name):
     '''Devuelve el dinero total que tiene el jugador, a partir de sus fichas'''
@@ -110,15 +110,10 @@ def init_chips():
             chip_dict['value'] = int(chip)
             chip_dict['owner'] = player_name
             chip_dict['pos'] = {'x': 0, 'y': 0} # Necesito saber en qué posición van las fichas de X valor, para cada jugador
+            chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
             chip_dict['dragged'] = False
             chips.append(chip_dict)
-
-def update_chip_pos(chip):
-    '''Actualiza la posición de la ficha, variando la posición respecto a la posición del ratón'''
-    for chip in chips:
-        if chip['dragged']:
-            chip['pos']['x'] = mouse['x'] - drag_offset['x']
-            chip['pos']['y'] = mouse['y'] - drag_offset['y']
+    return chips
 
 def any_chip_dragged():
     '''Devuelve True si alguna ficha está siendo arrastrada'''
@@ -135,12 +130,15 @@ def release_all_chips():
 if __name__ == '__main__':
     init_players()
     init_chips()
+    print(chips)
 
     # Test funciónes:
     # any_chip_dragged()
     # release_all_chips()
+    '''
     print(any_chip_dragged())
     chips[0]['dragged'] = True
     print(any_chip_dragged())
     release_all_chips()
     print(any_chip_dragged())
+    '''

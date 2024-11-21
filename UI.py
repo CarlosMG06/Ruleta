@@ -217,7 +217,13 @@ def update_board():
 def draw_chip(chip_dict={"value": f"{50:03}", "owner": "banca", "pos": (600,400)}):
     value = int(chip_dict["value"])
     owner = chip_dict["owner"]
-    pos = chip_dict["pos"]
+
+    # BORRAR EL 'if' CUANDO YA NO SE UTILICEN LAS FICHAS DE EJEMPLO EN main.py
+    # Y omitir el 'else' y mantener la declaración de 'pos'
+    if type(chip_dict['pos']) is tuple:
+        pos = chip_dict["pos"]
+    else:
+        pos = tuple(chip_dict['pos'].values())
     
     match owner:
         case "taronja": bg_color = ORANGE

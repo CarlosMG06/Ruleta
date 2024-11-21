@@ -22,11 +22,13 @@ drag_offset = {'x': 0, 'y': 0}
 
 # Bucle de l'aplicació
 def main():
+    global players, chips
     is_looping = True
 
     update_roulette()
     init_grid_surface()
-    init_players()
+    players = init_players()
+    chips = init_chips()
 
     while is_looping:
         is_looping = app_events()
@@ -85,12 +87,12 @@ def app_run():
         readjust_roulette()
         spin_counter["n"] += 1
 
-    ### Arrastrar fichas
-    # Si ninguna ficha está siendo arrastrada
+    # Arrastrar fichas
     if not any_chip_dragged() and mouse['pressed']:
-        # Buscamos una ficha que esté donde el ratón y no esté siendo dragged
-        for chip in chips:
-            if utils.is_point_in_circle(mouse, chip['pos']):
+        # Una ficha se dibuja superpuesta sobre otra, si la superpuesta aparece más adelante en la lista.
+        # Recorriendo la lista al revés, conseguimos que la ficha seleccionada sea la que veamos y no la que pueda haber debajo.
+        for chip in reversed(chips): 
+            if utils.is_point_in_circle(mouse, chip['pos'], chip['radius']):
                 chip['dragged'] = True
                 drag_offset["x"] = mouse['x'] - chip['pos']['x']
                 drag_offset["y"] = mouse['y'] - chip['pos']['y']
@@ -99,7 +101,10 @@ def app_run():
         if mouse["released"]:
             release_all_chips()
         else:
-            update_chip_pos()
+            for chip in chips:
+                if chip['dragged']:
+                    chip['pos']['x'] = mouse['x'] - drag_offset['x']
+                    chip['pos']['y'] = mouse['y'] - drag_offset['y']
         
     mouse["pressed"] = False
     mouse["released"] = False
@@ -136,6 +141,10 @@ def app_draw():
     
     # Dibuixar taula
     screen.blit(board_surface, (board["x"], board["y"]))
+
+    # Dibuixar fitxes
+    for chip in chips:
+        draw_chip(chip)
 
     # Actualitzar el dibuix a la finestra
     pygame.display.update()
