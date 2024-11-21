@@ -183,6 +183,12 @@ def update_board():
         "rect": {"x": table_x*2/3 + board['x'], "y": 1 + board['y'], "width": table_x/3, "height": c_h * 3},
         "tri1": zero_points[1:3], "tri2": zero_points[2:4]
         }
+    vertices = [
+        (board_cell_areas['0']['rect']['x'], board_cell_areas['0']['rect']['y']),
+        (board_cell_areas['0']['rect']['x'], board_cell_areas['0']['rect']['y'] + c_h * 3),
+        (board_cell_areas['0']['rect']['x'] - board['table_x']*(2/3), board_cell_areas['0']['rect']['y'] + c_h * 1.5)
+    ]
+    board_cell_areas['0']['vertices'] = vertices
 
     # Graella
     board_surface.blit(grid_surface, (table_x, 0))

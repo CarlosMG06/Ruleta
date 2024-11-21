@@ -50,4 +50,4 @@ def is_point_in_triangle(point, vertices):
     a2 = triangle_area(xp, yp, x2, y2, x3, y3)
     a3 = triangle_area(xp, yp, x1, y1, x3, y3)
     # Si el punto está dentro del triángulo, la suma de estas 3 areas debe ser igual al area original.
-    return a1 + a2 + a3 == area
+    return round(a1 + a2 + a3, 10) == round(area, 10) # Redondeamos los resultados a 10 decimales para poder compararlos

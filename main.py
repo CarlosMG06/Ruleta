@@ -103,7 +103,7 @@ def app_run():
                 if chip['dragged'] == True:
                     for board_cell in board_cell_areas:
                         valid = False
-                        if valid_chip_position(chip, board_cell_areas[board_cell]):
+                        if valid_chip_position(chip, board_cell):
                             valid = True
                             print(f'Posición válida!')
                             print(f'Nombre casilla: {board_cell}')
@@ -162,12 +162,7 @@ def app_draw():
         rect_values = (board_cell_areas[board_cell]['rect']['x'], board_cell_areas[board_cell]['rect']['y'], board_cell_areas[board_cell]['rect']['width'], board_cell_areas[board_cell]['rect']['height'])
         pygame.draw.rect(screen, color, rect_values, 3)
         if board_cell == '0':
-            punt_inici_1 = board_cell_areas[board_cell]['tri1'][0]
-            punt_final_1 = board_cell_areas[board_cell]['tri1'][1]
-            pygame.draw.line(screen, color, punt_inici_1, punt_final_1)
-            punt_inici_2 = board_cell_areas[board_cell]['tri2'][0]
-            punt_final_2 = board_cell_areas[board_cell]['tri2'][1]
-            pygame.draw.line(screen, color, punt_inici_2, punt_final_2)
+            pygame.draw.polygon(screen, color, board_cell_areas["0"]['vertices'], 3)
 
     # Dibuixar fitxes
     for chip in chips:
