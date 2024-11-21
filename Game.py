@@ -88,13 +88,17 @@ def valid_chip_position(chip, cell):
     
     Input:
         -chip(dict): chip dentro de el array chips
-        -cell(str): nombre de la celda en el tablero'''
-    for board_cell in board_cell_areas:
-        if board_cell == cell:
-            chip_in_cell= utils.is_point_in_rect(chip['pos'], board_cell['rect'])
-            if chip_in_cell:
-                return True
-            return False
+        -cell(dict): representa la celda del tablero (0, 1, ODD, RED, etc.)'''
+    chip_in_cell= utils.is_point_in_rect(chip['pos'], cell['rect'])
+    # Estas condiciones sólo son relevantes si estamos en la casilla del 0
+    chip_in_tri1 = True
+    chip_in_tri2 = True
+    if cell == '0':
+        chip_in_tri1 = utils.is_point_in_right_triangle(chip['pos'], cell['tri1'], 'bottom_right')
+        chip_in_tri2 = utils.is_point_in_right_triangle(chip['pos'], cell['tri2'], 'top_right')
+    if chip_in_cell and chip_in_tri1 and chip_in_tri2:
+        return True
+    return False
 
 def init_chips():
     '''Genera un array de diccionarios, donde cada diccionario contiene información de cada ficha.
