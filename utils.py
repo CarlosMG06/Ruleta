@@ -7,6 +7,10 @@ def point_on_circle(center, radius, angle_degrees):
     y = center[1] + radius * math.sin(angle_radians)  # Y coordinate
     return (x,y)
 
+def is_point_in_circle(point, center, r):
+    distancia = math.sqrt((point["x"] - center["x"]) ** 2 + (point["y"] - center["y"]) ** 2)
+    return distancia <= r
+
 def is_point_in_rect(point, rectangle):
     return (rectangle["x"] <= point["x"] <= rectangle["x"] + rectangle["width"] and
             rectangle["y"] <= point["y"] <= rectangle["y"] + rectangle["height"])
