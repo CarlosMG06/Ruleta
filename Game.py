@@ -118,7 +118,10 @@ def update_chip_pos(chip):
 
 def any_chip_dragged():
     '''Devuelve True si alguna ficha está siendo arrastrada'''
-    pass
+    for chip in chips:
+        if chip['dragged']:
+            return True
+    return False
 
 def release_all_chips():
     '''Dentro del array 'chips', define el valor 'dragged' de todas las fichas como False'''
@@ -127,5 +130,3 @@ def release_all_chips():
 if __name__ == '__main__':
     init_players()
     init_chips()
-    print(players)
-    print(chips)
