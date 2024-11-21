@@ -18,6 +18,8 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((800, 450))
 pygame.display.set_caption('Window Title')
 
+drag_offset = {'x': 0, 'y': 0}
+
 # Bucle de l'aplicació
 def main():
     is_looping = True
@@ -89,7 +91,9 @@ def app_run():
         # Buscamos una ficha que esté donde el ratón y no esté siendo dragged
         for chip in chips:
             if utils.is_point_in_circle(mouse, chip['pos']):
-                chips[chip]['dragged'] = True
+                chip['dragged'] = True
+                drag_offset["x"] = mouse['x'] - chip['pos']['x']
+                drag_offset["y"] = mouse['y'] - chip['pos']['y']
                 break
     else:
         if mouse["released"]:

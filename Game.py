@@ -1,5 +1,6 @@
 from GameData import *
 from UI_Data import *
+from main import mouse, drag_offset
 import math
 import utils
 
@@ -114,7 +115,10 @@ def init_chips():
 
 def update_chip_pos(chip):
     '''Actualiza la posición de la ficha, variando la posición respecto a la posición del ratón'''
-    pass
+    for chip in chips:
+        if chip['dragged']:
+            chip['pos']['x'] = mouse['x'] - drag_offset['x']
+            chip['pos']['y'] = mouse['y'] - drag_offset['y']
 
 def any_chip_dragged():
     '''Devuelve True si alguna ficha está siendo arrastrada'''
