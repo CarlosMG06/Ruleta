@@ -105,12 +105,12 @@ def app_run():
                         valid = False
                         if valid_chip_position(chip, board_cell):
                             valid = True
-                            print(f'Posición válida!')
+                            '''print(f'Posición válida!')
                             print(f'Nombre casilla: {board_cell}')
-                            print(f'Contenido de su diccionario: {board_cell_areas[board_cell]}')
+                            print(f'Contenido de su diccionario: {board_cell_areas[board_cell]}')'''
                             break
                     if not valid:
-                        print(f'Posición NO válida! Devolviendo ficha a la posición base...')
+                        '''print(f'Posición NO válida! Devolviendo ficha a la posición base...')'''
                         chip['pos']['x'] = 100
                         chip['pos']['y'] = 100
             release_all_chips()

@@ -94,9 +94,9 @@ def valid_chip_position(chip, cell):
     if cell == '0':
         chip_in_triangle = utils.is_point_in_triangle(chip['pos'], board_cell_areas[cell]['vertices'])
     if chip_in_cell or chip_in_triangle:
-        print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')
+        '''print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')'''
         return True
-    print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')
+    '''print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')'''
     return False
 
 def init_chips():
@@ -134,7 +134,6 @@ def release_all_chips():
 if __name__ == '__main__':
     init_players()
     init_chips()
-    print(chips)
 
     # Test funciónes:
     # any_chip_dragged()
