@@ -112,6 +112,18 @@ def init_chips():
             chip_dict['dragged'] = False
             chips.append(chip_dict)
 
+def update_chip_pos(chip):
+    '''Actualiza la posición de la ficha, variando la posición respecto a la posición del ratón'''
+    pass
+
+def any_chip_dragged():
+    '''Devuelve True si alguna ficha está siendo arrastrada'''
+    pass
+
+def release_all_chips():
+    '''Dentro del array 'chips', define el valor 'dragged' de todas las fichas como False'''
+    pass
+
 if __name__ == '__main__':
     init_players()
     init_chips()

@@ -57,6 +57,7 @@ def app_events():
 
 # Fer càlculs
 def app_run():
+    global chips
     delta_time = clock.get_time() / 1000.0
     
     if utils.is_point_in_rect(mouse, spin_button) and not roulette["spinning"]:
@@ -82,9 +83,23 @@ def app_run():
         readjust_roulette()
         spin_counter["n"] += 1
 
+    ### Arrastrar fichas
+    # Si ninguna ficha está siendo arrastrada
+    if not any_chip_dragged() and mouse['pressed']:
+        # Buscamos una ficha que esté donde el ratón y no esté siendo dragged
+        for chip in chips:
+            if utils.is_point_in_circle(mouse, chip['pos']):
+                chips[chip]['dragged'] = True
+                break
+    else:
+        if mouse["released"]:
+            release_all_chips()
+        else:
+            update_chip_pos()
+        
     mouse["pressed"] = False
     mouse["released"] = False
-        
+
 # Dibuixar
 def app_draw():
     # Pintar el fons de verd fosc
