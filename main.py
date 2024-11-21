@@ -89,8 +89,8 @@ def app_run():
 
     # Arrastrar fichas
     if not any_chip_dragged() and mouse['pressed']:
-        # Una ficha se dibuja superpuesta sobre otra, si la superpuesta aparece más adelante en la lista.
-        # Recorriendo la lista al revés, conseguimos que la ficha seleccionada sea la que veamos y no la que pueda haber debajo.
+        # Una fitxa es dibuixa superposada sobre una altra, si la superposada apareix més endavant en la llista.
+        # Recorrent la llista al revés, aconseguim que la fitxa seleccionada sigui la que vegem i no la que pugui haver-hi sota.
         for chip in reversed(chips): 
             if utils.is_point_in_circle(mouse, chip['pos'], chip['radius']):
                 chip['dragged'] = True
