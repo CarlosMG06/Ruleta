@@ -1,6 +1,7 @@
 from GameData import *
-from UI_Data import roulette
+from UI_Data import *
 import math
+import utils
 
 # Girar la ruleta
 def spin_roulette(delta_time):
@@ -81,14 +82,18 @@ def redistribute_player_chips(player_name):
 
     players[player_name] = new_chips_dict
 
-def valid_chip_position(chip, slot_rect):
+def valid_chip_position(chip, cell):
     '''Comprueba que la ficha puesta en el tablero de apuestas está en posición válida (True, False).
     
     Input:
         -chip(dict): chip dentro de el array chips
-        -slot_rect(Rect): Objeto Rect que representa la posición de la casilla del tablero de apuestro'''
-    # Necesito saber los Rect del tablero de apuestas
-    pass
+        -cell(str): nombre de la celda en el tablero'''
+    for board_cell in board_cell_areas:
+        if board_cell == cell:
+            chip_in_cell= utils.is_point_in_rect(chip['pos'], board_cell['rect'])
+            if chip_in_cell:
+                return True
+            return False
 
 def init_chips():
     '''Genera un array de diccionarios, donde cada diccionario contiene información de cada ficha.
