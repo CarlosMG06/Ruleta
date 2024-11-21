@@ -125,8 +125,18 @@ def any_chip_dragged():
 
 def release_all_chips():
     '''Dentro del array 'chips', define el valor 'dragged' de todas las fichas como False'''
-    pass
+    for chip in chips:
+        chip['dragged'] = False
 
 if __name__ == '__main__':
     init_players()
     init_chips()
+
+    # Test funciónes:
+    # any_chip_dragged()
+    # release_all_chips()
+    print(any_chip_dragged())
+    chips[0]['dragged'] = True
+    print(any_chip_dragged())
+    release_all_chips()
+    print(any_chip_dragged())
