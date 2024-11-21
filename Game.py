@@ -112,6 +112,7 @@ def init_chips():
             chip_dict['pos'] = {'x': 0, 'y': 0} # Necesito saber en qué posición van las fichas de X valor, para cada jugador
             chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
             chip_dict['dragged'] = False
+            chip_dict['current cell'] = 'owner'
             chips.append(chip_dict)
     return chips
 
