@@ -40,15 +40,29 @@ spin_button = {
     "width": 80, "height": 30}
 
 # Taula
-board = {"x": 350, "y": 20, "columns": 4, "rows": 12, "table_x": 50,
-"cell": {"width": 28, "height": roulette["radius"]/3}, "ellipse": {"width": 22, "height": 40}}
+board = {"x": 350, "y": 20, "columns": 4, "rows": 12, "grid_x": 50,
+    "cell": {"width": 28, "height": roulette["radius"]/3},
+    "ellipse": {"width": 22, "height": 40}
+}
 
 grid_size = (board["cell"]["width"] * board["rows"], board["cell"]["height"] * board["columns"])
 grid_surface = Surface(grid_size)
 grid_surface.fill(DARK_GREEN)
 
-board_size = (grid_size[0]+board["table_x"]+board["cell"]["width"]*1.5,grid_size[1])
+board_size = (grid_size[0]+board["grid_x"]+board["cell"]["width"]*1.5,grid_size[1])
 board_surface = Surface(board_size)
 board_surface.fill(DARK_GREEN)
 
 board_cell_areas = {}
+
+# Graella dels jugadors
+player_grid = {"x": board["x"] + board["grid_x"]/2, "y": 300, "rows": 4, "columns": 6,
+    "cell": {"width": board["cell"]["width"]*2, "height": roulette["radius"]/5,
+            "1st_w": board["cell"]["width"]*2 + board["grid_x"], "1st_h":  roulette["radius"]/3}
+}
+
+pg_width = player_grid["cell"]["1st_w"] + player_grid["cell"]["width"] * (player_grid["columns"]-1)
+pg_height = player_grid["cell"]["1st_h"] + player_grid["cell"]["height"] * (player_grid["rows"]-1)
+pg_size = (pg_width, pg_height)
+player_grid_surface = Surface(pg_size)
+player_grid_surface.fill(DARK_GREEN)

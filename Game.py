@@ -1,5 +1,5 @@
 from GameData import *
-from UI_Data import *
+from UI_Data import roulette, board_cell_areas
 import math
 import utils
 
@@ -38,11 +38,8 @@ def init_players():
     '''Inicia el diccionario que contiene información de los jugadores.'''
     global players
 
-    # Parámetros partida
-    player_names = ['taronja','lila','blau']
-    starting_chips = [(100,0),(50,1),(20,1),(10,2),(5,2)] # Las tuplas son: (NomFicha, Cantidad)
+    starting_chips = list(zip(chip_values, (0,1,1,2,2))) # Las tuplas son: (NomFicha, Cantidad)
     
-    players = {}
     for name in player_names:
         player_dict = {}
         for ficha in starting_chips:

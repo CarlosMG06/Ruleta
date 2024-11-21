@@ -1,5 +1,5 @@
 from UI_Data import *
-from GameData import current_number
+from GameData import *
 from pygame import draw, font
 from pygame.transform import rotate
 import utils
@@ -148,47 +148,47 @@ def init_grid_surface():
     draw.rect(grid_surface, LIGHT_GRAY, (0, 0, grid_size[0], grid_size[1]), 3)
 
     #Línies internes
-    for row in range(1, cols):
-        y = c_h * row
+    for col in range(1, cols):
+        y = c_h * col
         draw.line(grid_surface, LIGHT_GRAY, (0, y), (grid_size[0], y), 3)
-    for col in range(1, rows):
-        x = c_w * col
+    for row in range(1, rows):
+        x = c_w * row
         y = grid_size[1]
-        if col % 3 != 0:
+        if row % 3 != 0:
             y -= c_h
         draw.line(grid_surface, LIGHT_GRAY, (x, 0), (x, y), 3)
 
 def update_board():
     # Abreujar noms
-    table_x = board["table_x"]
+    grid_x = board["grid_x"]
     rows = board["rows"]
     c_w, c_h = board["cell"]["width"], board["cell"]["height"]
     
     # Espai de zero
     zero_points = [
-    (table_x, 1),
-    (table_x*2/3, 1),
+    (grid_x, 1),
+    (grid_x*2/3, 1),
     (0, c_h * 1.5),
-    (table_x*2/3, c_h * 3),
-    (table_x, c_h * 3)]
+    (grid_x*2/3, c_h * 3),
+    (grid_x, c_h * 3)]
     draw.lines(board_surface, LIGHT_GRAY, False, zero_points, 3)
 
     text_zero = font_huge.render("0", True, WHITE, DARK_GREEN)
     text_zero_rotated = rotate(text_zero, 90)
-    text_zero_rotated_rect = text_zero_rotated.get_rect(center = (table_x*5/9, c_h * 1.5))
+    text_zero_rotated_rect = text_zero_rotated.get_rect(center = (grid_x*5/9, c_h * 1.5))
     board_surface.blit(text_zero_rotated, text_zero_rotated_rect)
 
     board_cell_areas["0"] = {
-        "rect": {"x": table_x*2/3, "y": 1, "width": table_x/3, "height": c_h * 3 - 1},
+        "rect": {"x": grid_x*2/3, "y": 1, "width": grid_x/3, "height": c_h * 3 - 1},
         "tri1": zero_points[1:3], "tri2": zero_points[2:4]
         }
 
     # Graella
-    board_surface.blit(grid_surface, (table_x, 0))
+    board_surface.blit(grid_surface, (grid_x, 0))
 
     # Espais de columnes
     for col in range(3):
-        x = table_x + c_w * rows
+        x = grid_x + c_w * rows
         y = c_h * col
         
         center = (x + c_w/2, y + c_h/2)
@@ -214,25 +214,85 @@ def update_board():
 
     #draw_bets()
 
-def draw_chip(chip_dict={"value": f"{50:03}", "owner": "banca", "pos": (600,400)}):
+def update_player_grid():
+    # Abreujar noms
+    cols, rows = player_grid["columns"], player_grid["rows"]
+    c_w, c_h = player_grid["cell"]["width"], player_grid["cell"]["height"]
+    c_1w, c_1h = player_grid["cell"]["1st_w"], player_grid["cell"]["1st_h"]
+
+    #Quadre extern
+    #draw.rect(player_grid_surface, LIGHT_GRAY, (0, 0, pg_size[0], pg_size[1]), 3)
+
+    #Línies internes
+    for col in range(1, cols):
+        x = c_1w + c_w * (col-1)
+        draw.line(player_grid_surface, LIGHT_GRAY, (x, 0), (x, pg_size[1]), 3)
+    for row in range(1, rows):
+        y = c_1h + c_h * (row-1)
+        draw.line(player_grid_surface, LIGHT_GRAY, (0, y), (pg_size[0], y), 3)
+    
+    for row in range(rows):
+        y = 0 if row == 0 else c_1h + c_h * (row-1)
+        center_y = y + c_1h/2 if row == 0 else y + c_h/2 
+        for col in range(cols):
+            x = 0 if col == 0 else c_1w + c_w * (col-1)
+            center_x = x + c_1w/2 if col == 0 else x + c_w/2
+
+            # Primera cel·la: la banca
+            if row == 0 and col == 0:
+                text = font_serif.render("HOUSE", True, WHITE, DARK_GREEN)
+                text_rect = text.get_rect(center=(center_x,center_y))
+                player_grid_surface.blit(text, text_rect)
+            
+            # Primera fila: fitxes
+            elif row == 0:
+                if players[current_player["name"]][f"{chip_values[col-1]:03}"] > 0:
+                    draw_chip({"value": f"{chip_values[col-1]:03}", "owner": f"{current_player["name"]}", "pos": (center_x, center_y)}, bet=False)
+
+            # Primera columna: noms dels jugadors
+            elif col == 0:
+                name = player_names[row-1]
+                match name:
+                    case "taronja": color = ORANGE
+                    case "blau": color = BLUE
+                    case "lila": color = PURPLE
+                text = font_medium.render(name, True, color, DARK_GREEN)
+                text_rect = text.get_rect(center=(center_x,center_y))
+                player_grid_surface.blit(text, text_rect)
+            
+            # Quantitats de fitxes de cada jugador
+            else:
+                amount = players[player_names[row-1]][f"{chip_values[col-1]:03}"]
+                text = font_medium.render(f"× {str(amount)}", True, WHITE, DARK_GREEN)
+                text_rect = text.get_rect(center=(center_x,center_y))
+                player_grid_surface.blit(text, text_rect)
+            
+            
+
+    #for name, dict in players.items():
+
+def draw_chip(chip_dict, bet=True):
     value = int(chip_dict["value"])
     owner = chip_dict["owner"]
     pos = chip_dict["pos"]
     
+    surface = screen if bet else player_grid_surface
+
     match owner:
         case "taronja": bg_color = ORANGE
         case "blau": bg_color = BLUE
         case "lila": bg_color = PURPLE
-        case "banca": bg_color = WHITE
+        #case "banca": bg_color = WHITE
     color = (bg_color[0]/2, bg_color[1]/2, bg_color[2]/2)
 
-    radius = 6 + int(math.log2(value)*3)
-    draw.circle(screen, bg_color, pos, radius)
+    radius = 8 + int(math.log2(value)*2)
 
-    text_font = font_medium if value >= 50 else font_small
+    draw.circle(surface, bg_color, pos, radius)
+
+    text_font = font_small
     text = text_font.render(str(value), True, color)
     text_rect = text.get_rect(center=pos)
-    screen.blit(text, text_rect)
+    surface.blit(text, text_rect)
 
     for i in range(8):    
         angle = 360/8 * (i + 0.25)
@@ -243,15 +303,15 @@ def draw_chip(chip_dict={"value": f"{50:03}", "owner": "banca", "pos": (600,400)
         p2 = utils.point_on_circle(pos, radius-1, angle)
         p3 = utils.point_on_circle(pos, radius*2/3, angle)
 
-        polygon_color = LIGHT_GRAY if bg_color != WHITE and i % 2 == 0 else DARK_GRAY
+        polygon_color = LIGHT_GRAY if i % 2 == 0 else DARK_GRAY #if bg_color != WHITE and i % 2 == 0 else DARK_GRAY
         points = [p0,p1,p2,p3]
-        draw.polygon(screen, polygon_color, points)  
+        draw.polygon(surface, polygon_color, points)  
 
     border_width = 2
     inner_border_width = 1
     if value >= 50:
         border_width += 1
         inner_border_width += 1
-    draw.circle(screen, color, pos, radius, border_width)
-    draw.circle(screen, color, pos, radius*2/3, inner_border_width)   
+    draw.circle(surface, color, pos, radius, border_width)
+    draw.circle(surface, color, pos, radius*2/3, inner_border_width)   
     

@@ -58,7 +58,7 @@ def app_events():
 # Fer càlculs
 def app_run():
     delta_time = clock.get_time() / 1000.0
-    
+
     if utils.is_point_in_rect(mouse, spin_button) and not roulette["spinning"]:
         if mouse["pressed"]:
             # La ruleta gira una miqueta com a anticipació per fer efecte
@@ -97,8 +97,9 @@ def app_draw():
         # Actualitzar la ruleta quan està girant
         update_roulette()
     else:
-        # Actualitzar taula si la ruleta no està girant
+        # Actualitzar taula i graella dels jugadors si la ruleta no està girant
         update_board()
+        update_player_grid()
         if spin_counter["n"] > 0:
             # Dibuixar el número actual si la ruleta no està girant i s'ha girat una vegada com a mínim
             screen.blit(current_number_text["text"], current_number_text["rect"])
@@ -108,15 +109,14 @@ def app_draw():
     #Dibuixar botó de gir
     draw_spin_button()
     
-    # temporal: prova per veure l'aparença de les fitxes i decidir la seva posició
-    draw_chip(chip_dict={"value": f"{100:03}", "owner": "taronja", "pos": (500,400)})
-    draw_chip(chip_dict={"value": f"{50:03}", "owner": "banca", "pos": (550,400)})
-    draw_chip(chip_dict={"value": f"{20:03}", "owner": "lila", "pos": (600,400)})
-    draw_chip(chip_dict={"value": f"{10:03}", "owner": "taronja", "pos": (650,400)})
-    draw_chip(chip_dict={"value": f"{5:03}", "owner": "blau", "pos": (700,400)})
+    # Línia de separació
+    pygame.draw.line(screen, LIGHT_GRAY, (340, 0), (340, 450), 2)
     
     # Dibuixar taula
     screen.blit(board_surface, (board["x"], board["y"]))
+
+    # Dibuixar graella dels jugadors
+    screen.blit(player_grid_surface, (player_grid["x"], player_grid["y"]))
 
     # Actualitzar el dibuix a la finestra
     pygame.display.update()
