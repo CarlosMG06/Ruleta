@@ -18,13 +18,17 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((800, 450))
 pygame.display.set_caption('Window Title')
 
+drag_offset = {'x': 0, 'y': 0}
+
 # Bucle de l'aplicació
 def main():
+    global players, chips
     is_looping = True
 
     update_roulette()
     init_grid_surface()
-    init_players()
+    players = init_players()
+    chips = init_chips()
 
     while is_looping:
         is_looping = app_events()
@@ -57,6 +61,7 @@ def app_events():
 
 # Fer càlculs
 def app_run():
+    global chips
     delta_time = clock.get_time() / 1000.0
 
     if current_mode["betting"]:
@@ -121,9 +126,42 @@ def app_run():
                 current_mode["info"] = True
     """
 
+    # Arrastrar fichas
+    if not any_chip_dragged() and mouse['pressed']:
+        # Una fitxa es dibuixa superposada sobre una altra, si la superposada apareix més endavant en la llista.
+        # Recorrent la llista al revés, aconseguim que la fitxa seleccionada sigui la que vegem i no la que pugui haver-hi sota.
+        for chip in reversed(chips): 
+            if utils.is_point_in_circle(mouse, chip['pos'], chip['radius']):
+                chip['dragged'] = True
+                drag_offset["x"] = mouse['x'] - chip['pos']['x']
+                drag_offset["y"] = mouse['y'] - chip['pos']['y']
+                break
+    else:
+        if mouse["released"]:
+            for chip in chips:
+                if chip['dragged'] == True:
+                    for board_cell in board_cell_areas:
+                        valid = False
+                        if valid_chip_position(chip, board_cell):
+                            valid = True
+                            '''print(f'Posición válida!')
+                            print(f'Nombre casilla: {board_cell}')
+                            print(f'Contenido de su diccionario: {board_cell_areas[board_cell]}')'''
+                            break
+                    if not valid:
+                        '''print(f'Posición NO válida! Devolviendo ficha a la posición base...')'''
+                        chip['pos']['x'] = 100
+                        chip['pos']['y'] = 100
+            release_all_chips()
+        else:
+            for chip in chips:
+                if chip['dragged']:
+                    chip['pos']['x'] = mouse['x'] - drag_offset['x']
+                    chip['pos']['y'] = mouse['y'] - drag_offset['y']
+        
     mouse["pressed"] = False
     mouse["released"] = False
-        
+
 # Dibuixar
 def app_draw():
     # Pintar el fons de verd fosc
@@ -159,6 +197,18 @@ def app_draw():
 
     # Dibuixar graella dels jugadors
     screen.blit(player_grid_surface, (player_grid["x"], player_grid["y"]))
+    
+    # Muestra regiones del tablero a partir de sus Rect
+    for board_cell in board_cell_areas:
+        color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
+        rect_values = (board_cell_areas[board_cell]['rect']['x'], board_cell_areas[board_cell]['rect']['y'], board_cell_areas[board_cell]['rect']['width'], board_cell_areas[board_cell]['rect']['height'])
+        pygame.draw.rect(screen, color, rect_values, 3)
+        if board_cell == '0':
+            pygame.draw.polygon(screen, color, board_cell_areas["0"]['vertices'], 3)
+
+    # Dibuixar fitxes
+    for chip in chips:
+        draw_chip(chip)
 
     # Actualitzar el dibuix a la finestra
     pygame.display.update()
