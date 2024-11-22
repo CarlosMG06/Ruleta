@@ -138,7 +138,7 @@ def init_grid_surface():
         text_n_rotated_rect = text_n_rotated.get_rect(center=(center_x, center_y))
         grid_surface.blit(text_n_rotated, text_n_rotated_rect)
 
-        board_cell_areas[str(n)] = {"rect": {"x": x, "y": y, "width": c_w, "height": c_h}}
+        board_cell_areas[str(n)] = {"rect": {"x": x + board['x'] + board['table_x'], "y": y + board['y'], "width": c_w, "height": c_h}}
 
     # Cel·les inferiors
     for bottom_cell in range(4):
@@ -165,7 +165,7 @@ def init_grid_surface():
             draw.polygon(grid_surface, color, diamond_points)
             draw.polygon(grid_surface, LIGHT_GRAY, diamond_points, 3)
 
-        board_cell_areas[string] = {"rect": {"x": x, "y": y, "width": c_w * 3, "height": c_h}}
+        board_cell_areas[string] = {"rect": {"x": x + board['x'] + board['table_x'], "y": y + board['y'], "width": c_w * 3, "height": c_h}}
 
     #Quadre extern
     draw.rect(grid_surface, LIGHT_GRAY, (0, 0, grid_size[0], grid_size[1]), 3)
@@ -201,10 +201,17 @@ def update_board():
     text_zero_rotated_rect = text_zero_rotated.get_rect(center = (grid_x*5/9, zero_points[2][1]))
     board_surface.blit(text_zero_rotated, text_zero_rotated_rect)
 
+    
     board_cell_areas["0"] = {
         "rect": {"x": grid_x*2/3, "y": grid_y + 1, "width": grid_x/3, "height": c_h * 3 - 1},
         "tri1": zero_points[1:3], "tri2": zero_points[2:4]
         }
+    vertices = [
+        (board_cell_areas['0']['rect']['x'], board_cell_areas['0']['rect']['y']),
+        (board_cell_areas['0']['rect']['x'], board_cell_areas['0']['rect']['y'] + c_h * 3),
+        (board_cell_areas['0']['rect']['x'] - board['table_x']*(2/3), board_cell_areas['0']['rect']['y'] + c_h * 1.5)
+    ]
+    board_cell_areas['0']['vertices'] = vertices
 
     # Graella
     board_surface.blit(grid_surface, (grid_x, grid_y))
@@ -240,10 +247,10 @@ def update_board():
         if col != 0: points.pop(0)
         draw.lines(board_surface, LIGHT_GRAY, False, points, 3)
 
-        board_cell_areas[f"col{col+1}"] = {
+        '''board_cell_areas[f"col{col+1}"] = {
             "rect": {"x": x, "y": y, "width": c_w * 0.9, "height": c_h - 1},
             "tri1": points[1:3], "tri2": points[2:4]
-        }
+        }'''
 
     #draw_bets()
 
@@ -305,7 +312,13 @@ def update_player_grid():
 def draw_chip(chip_dict, bet=True):
     value = int(chip_dict["value"])
     owner = chip_dict["owner"]
-    pos = chip_dict["pos"]
+
+    # BORRAR EL 'if' CUANDO YA NO SE UTILICEN LAS FICHAS DE EJEMPLO EN main.py
+    # Y omitir el 'else' y mantener la declaración de 'pos'
+    if type(chip_dict['pos']) is tuple:
+        pos = chip_dict["pos"]
+    else:
+        pos = tuple(chip_dict['pos'].values()) # Mantener esta linea!
     
     surface = screen if bet else player_grid_surface
 

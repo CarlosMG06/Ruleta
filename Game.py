@@ -51,6 +51,7 @@ def init_players():
             chip_amount = ficha[1]
             player_dict[chip_value] = chip_amount
         players[name] = player_dict
+    return players
 
 def total_money_player(player_name):
     '''Devuelve el dinero total que tiene el jugador, a partir de sus fichas'''
@@ -88,13 +89,16 @@ def valid_chip_position(chip, cell):
     
     Input:
         -chip(dict): chip dentro de el array chips
-        -cell(str): nombre de la celda en el tablero'''
-    for board_cell in board_cell_areas:
-        if board_cell == cell:
-            chip_in_cell= utils.is_point_in_rect(chip['pos'], board_cell['rect'])
-            if chip_in_cell:
-                return True
-            return False
+        -cell(str): representa la celda del tablero ('0', '27', 'ODD', 'RED', etc.)'''
+    chip_in_cell= utils.is_point_in_rect(chip['pos'], board_cell_areas[cell]['rect'])
+    chip_in_triangle = False # Esta condicion sólo es relevante si estamos en la casilla '0'
+    if cell == '0':
+        chip_in_triangle = utils.is_point_in_triangle(chip['pos'], board_cell_areas[cell]['vertices'])
+    if chip_in_cell or chip_in_triangle:
+        '''print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')'''
+        return True
+    '''print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')'''
+    return False
 
 def init_chips():
     '''Genera un array de diccionarios, donde cada diccionario contiene información de cada ficha.
@@ -110,8 +114,23 @@ def init_chips():
             chip_dict['value'] = int(chip)
             chip_dict['owner'] = player_name
             chip_dict['pos'] = {'x': 0, 'y': 0} # Necesito saber en qué posición van las fichas de X valor, para cada jugador
+            chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
             chip_dict['dragged'] = False
+            chip_dict['current cell'] = 'owner'
             chips.append(chip_dict)
+    return chips
+
+def any_chip_dragged():
+    '''Devuelve True si alguna ficha está siendo arrastrada'''
+    for chip in chips:
+        if chip['dragged']:
+            return True
+    return False
+
+def release_all_chips():
+    '''Dentro del array 'chips', define el valor 'dragged' de todas las fichas como False'''
+    for chip in chips:
+        chip['dragged'] = False
 
 def confirm_bet():
     pass
@@ -128,5 +147,14 @@ def hide_info():
 if __name__ == '__main__':
     init_players()
     init_chips()
-    print(players)
-    print(chips)
+
+    # Test funciónes:
+    # any_chip_dragged()
+    # release_all_chips()
+    '''
+    print(any_chip_dragged())
+    chips[0]['dragged'] = True
+    print(any_chip_dragged())
+    release_all_chips()
+    print(any_chip_dragged())
+    '''
