@@ -203,7 +203,7 @@ def update_board():
 
     
     board_cell_areas["0"] = {
-        "rect": {"x": grid_x*2/3, "y": grid_y + 1, "width": grid_x/3, "height": c_h * 3 - 1},
+        "rect": {"x": grid_x*2/3 + board["x"], "y": grid_y + 1 + board["y"], "width": grid_x/3, "height": c_h * 3 - 1},
         "tri1": zero_points[1:3], "tri2": zero_points[2:4]
         }
     vertices = [
