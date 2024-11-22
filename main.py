@@ -34,6 +34,8 @@ def main():
         is_looping = app_events()
         app_run()
         app_draw()
+        print(players)
+        print(chips_positions)
 
         clock.tick(60) # Limitar a 60 FPS
 
@@ -199,12 +201,18 @@ def app_draw():
     screen.blit(player_grid_surface, (player_grid["x"], player_grid["y"]))
     
     # Muestra regiones del tablero a partir de sus Rect
-    for board_cell in board_cell_areas:
+    '''for board_cell in board_cell_areas:
         color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
         rect_values = (board_cell_areas[board_cell]['rect']['x'], board_cell_areas[board_cell]['rect']['y'], board_cell_areas[board_cell]['rect']['width'], board_cell_areas[board_cell]['rect']['height'])
         pygame.draw.rect(screen, color, rect_values, 3)
         if board_cell == '0':
-            pygame.draw.polygon(screen, color, board_cell_areas["0"]['vertices'], 3)
+            pygame.draw.polygon(screen, color, board_cell_areas["0"]['vertices'], 3)'''
+
+    # Muestra los centros de las posiciones originales de las fichas
+    '''for chip in chips_positions:
+        center = (chips_positions[chip]['x'], chips_positions[chip]['y'])
+        color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
+        pygame.draw.circle(screen, color, center, 10)'''
 
     # Dibuixar fitxes
     for chip in chips:
