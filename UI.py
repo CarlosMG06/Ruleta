@@ -138,7 +138,7 @@ def init_grid_surface():
         text_n_rotated_rect = text_n_rotated.get_rect(center=(center_x, center_y))
         grid_surface.blit(text_n_rotated, text_n_rotated_rect)
 
-        board_cell_areas[str(n)] = {"rect": {"x": x + board['x'] + board['table_x'], "y": y + board['y'], "width": c_w, "height": c_h}}
+        board_cell_areas[str(n)] = {"rect": {"x": x + board['x'] + board['grid_x'], "y": y + board['y'], "width": c_w, "height": c_h}}
 
     # Cel·les inferiors
     for bottom_cell in range(4):
@@ -165,7 +165,7 @@ def init_grid_surface():
             draw.polygon(grid_surface, color, diamond_points)
             draw.polygon(grid_surface, LIGHT_GRAY, diamond_points, 3)
 
-        board_cell_areas[string] = {"rect": {"x": x + board['x'] + board['table_x'], "y": y + board['y'], "width": c_w * 3, "height": c_h}}
+        board_cell_areas[string] = {"rect": {"x": x + board['x'] + board['grid_x'], "y": y + board['y'], "width": c_w * 3, "height": c_h}}
 
     #Quadre extern
     draw.rect(grid_surface, LIGHT_GRAY, (0, 0, grid_size[0], grid_size[1]), 3)
@@ -209,7 +209,7 @@ def update_board():
     vertices = [
         (board_cell_areas['0']['rect']['x'], board_cell_areas['0']['rect']['y']),
         (board_cell_areas['0']['rect']['x'], board_cell_areas['0']['rect']['y'] + c_h * 3),
-        (board_cell_areas['0']['rect']['x'] - board['table_x']*(2/3), board_cell_areas['0']['rect']['y'] + c_h * 1.5)
+        (board_cell_areas['0']['rect']['x'] - board['grid_x']*(2/3), board_cell_areas['0']['rect']['y'] + c_h * 1.5)
     ]
     board_cell_areas['0']['vertices'] = vertices
 
