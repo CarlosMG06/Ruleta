@@ -15,6 +15,7 @@ def spin_roulette(delta_time):
         elif roulette["readjusting"]:
             roulette["readjusting"] = False
             spin_counter["n"] += 1
+            log_info()
             current_mode["roulette"] = False
             current_mode["betting"] = True
         elif roulette["spin_canceled"]:
@@ -113,6 +114,9 @@ def init_chips():
             chips.append(chip_dict)
 
 def confirm_bet():
+    pass
+
+def log_info():
     pass
 
 def show_info():
