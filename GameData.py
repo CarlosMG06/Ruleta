@@ -7,3 +7,9 @@ player_names = ["taronja", "blau", "lila"]
 current_player = {"name": "taronja"}
 
 players = {}
+
+current_mode = {"roulette": True, "betting": False, "info": False}
+current_bets = []
+
+# Llista de diccionaris: {"number_result":, "bets":, "credits":}
+info_rounds = []

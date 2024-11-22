@@ -40,7 +40,7 @@ spin_button = {
     "width": 80, "height": 30}
 
 # Taula
-board = {"x": 350, "y": 20, "columns": 4, "rows": 12, "grid_x": 50,
+board = {"x": 350, "y": 10, "columns": 4, "rows": 12, "grid_x": 50, "grid_y": 50,
     "cell": {"width": 28, "height": roulette["radius"]/3},
     "ellipse": {"width": 22, "height": 40}
 }
@@ -49,11 +49,18 @@ grid_size = (board["cell"]["width"] * board["rows"], board["cell"]["height"] * b
 grid_surface = Surface(grid_size)
 grid_surface.fill(DARK_GREEN)
 
-board_size = (grid_size[0]+board["grid_x"]+board["cell"]["width"]*1.5,grid_size[1])
+board_size = (grid_size[0] + board["grid_x"] + board["cell"]["width"]*1.5,
+              grid_size[1] + board["grid_y"])
 board_surface = Surface(board_size)
 board_surface.fill(DARK_GREEN)
 
 board_cell_areas = {}
+
+# Botó de confirmar aposta
+bet_button = {
+    "x": board["x"] + board["grid_x"] + board["cell"]["width"]*7 + 5, "y": board["y"] + 5,
+    "width": board["cell"]["width"]*4 - 10, "height": board["grid_y"] - 10,
+    "enabled": True, "pressed": False}
 
 # Graella dels jugadors
 player_grid = {"x": board["x"] + board["grid_x"]/2, "y": 300, "rows": 4, "columns": 6,

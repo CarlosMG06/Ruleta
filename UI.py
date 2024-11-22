@@ -36,7 +36,7 @@ def draw_spin_button():
         fill_color = GOLD
         border_color = BLACK
         text_color = BLACK
-    elif roulette["spin_canceled"] or roulette["spinning"] or roulette["readjusting"]:
+    elif roulette["spin_canceled"] or roulette["spinning"] or roulette["readjusting"] or not current_mode["roulette"]:
         fill_color = DARK_GRAY
         border_color = GRAY
         text_color = GRAY
@@ -45,7 +45,7 @@ def draw_spin_button():
     draw.rect(screen, border_color, sb_rect_tuple, 2)
     
     sb_text = font_big.render("Spin!", True, text_color)
-    center = (spin_button["x"] + 40, spin_button["y"] + 15)
+    center = (spin_button["x"] + spin_button["width"]/2, spin_button["y"] + spin_button["height"]/2)
     sb_text_rect = sb_text.get_rect(center=center)
     screen.blit(sb_text, sb_text_rect)
 
@@ -90,6 +90,29 @@ def update_roulette():
         text_n_rotated_rect = text_n_rotated.get_rect()
         text_n_rotated_rect.center = polygon_center
         roulette_surface.blit(text_n_rotated, text_n_rotated_rect)
+
+def draw_bet_button():
+    bb_rect_tuple = (bet_button["x"], bet_button["y"], bet_button["width"], bet_button["height"])
+    
+    fill_color = BLACK
+    border_color = LIGHT_GRAY
+    text_color = WHITE
+    if not bet_button["enabled"]:
+        fill_color = DARK_GRAY
+        border_color = GRAY
+        text_color = GRAY
+    elif bet_button["pressed"]:
+        fill_color = GOLD
+        border_color = BLACK
+        text_color = BLACK
+    
+    draw.rect(screen, fill_color, bb_rect_tuple)
+    draw.rect(screen, border_color, bb_rect_tuple, 2)
+    
+    bb_text = font_big.render("Bet!", True, text_color)
+    center = (bet_button["x"] + bet_button["width"]/2, bet_button["y"] + bet_button["height"]/2)
+    bb_text_rect = bb_text.get_rect(center=center)
+    screen.blit(bb_text, bb_text_rect)
 
 def init_grid_surface():
     # Abreujar noms
@@ -160,36 +183,46 @@ def init_grid_surface():
 
 def update_board():
     # Abreujar noms
-    grid_x = board["grid_x"]
+    grid_x, grid_y = board["grid_x"], board["grid_y"]
     rows = board["rows"]
     c_w, c_h = board["cell"]["width"], board["cell"]["height"]
     
     # Espai de zero
     zero_points = [
-    (grid_x, 1),
-    (grid_x*2/3, 1),
-    (0, c_h * 1.5),
-    (grid_x*2/3, c_h * 3),
-    (grid_x, c_h * 3)]
+    (grid_x,     grid_y + 1),
+    (grid_x*2/3, grid_y + 1),
+    (0,          grid_y + c_h * 1.5),
+    (grid_x*2/3, grid_y + c_h * 3),
+    (grid_x,     grid_y + c_h * 3)]
     draw.lines(board_surface, LIGHT_GRAY, False, zero_points, 3)
 
     text_zero = font_huge.render("0", True, WHITE, DARK_GREEN)
     text_zero_rotated = rotate(text_zero, 90)
-    text_zero_rotated_rect = text_zero_rotated.get_rect(center = (grid_x*5/9, c_h * 1.5))
+    text_zero_rotated_rect = text_zero_rotated.get_rect(center = (grid_x*5/9, zero_points[2][1]))
     board_surface.blit(text_zero_rotated, text_zero_rotated_rect)
 
     board_cell_areas["0"] = {
-        "rect": {"x": grid_x*2/3, "y": 1, "width": grid_x/3, "height": c_h * 3 - 1},
+        "rect": {"x": grid_x*2/3, "y": grid_y + 1, "width": grid_x/3, "height": c_h * 3 - 1},
         "tri1": zero_points[1:3], "tri2": zero_points[2:4]
         }
 
     # Graella
-    board_surface.blit(grid_surface, (grid_x, 0))
+    board_surface.blit(grid_surface, (grid_x, grid_y))
+
+    # Espai de la banca
+    house_rect = (grid_x + c_w + 5, 5, c_w*4 - 10, grid_y - 10)
+    draw.rect(board_surface, LIGHT_GRAY, house_rect, 3)
+
+    center_x = house_rect[0] + house_rect[2]/2
+    center_y = house_rect[1] + house_rect[3]/2
+    text_house = font_serif.render("HOUSE", True, WHITE, DARK_GREEN)
+    text_house_rect = text_house.get_rect(center=(center_x,center_y))
+    board_surface.blit(text_house, text_house_rect)
 
     # Espais de columnes
     for col in range(3):
         x = grid_x + c_w * rows
-        y = c_h * col
+        y = grid_y + c_h * col
         
         center = (x + c_w/2, y + c_h/2)
         text = font_medium.render("2 : 1", True, WHITE, DARK_GREEN)
@@ -238,11 +271,9 @@ def update_player_grid():
             x = 0 if col == 0 else c_1w + c_w * (col-1)
             center_x = x + c_1w/2 if col == 0 else x + c_w/2
 
-            # Primera cel·la: la banca
+            # Primera cel·la: res
             if row == 0 and col == 0:
-                text = font_serif.render("HOUSE", True, WHITE, DARK_GREEN)
-                text_rect = text.get_rect(center=(center_x,center_y))
-                player_grid_surface.blit(text, text_rect)
+                continue
             
             # Primera fila: fitxes
             elif row == 0:

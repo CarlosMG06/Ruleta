@@ -14,6 +14,9 @@ def spin_roulette(delta_time):
             roulette["readjusting"] = True
         elif roulette["readjusting"]:
             roulette["readjusting"] = False
+            spin_counter["n"] += 1
+            current_mode["roulette"] = False
+            current_mode["betting"] = True
         elif roulette["spin_canceled"]:
             roulette["spin_canceled"] = False
         roulette["angle_offset"] %= 360
@@ -108,6 +111,15 @@ def init_chips():
             chip_dict['pos'] = {'x': 0, 'y': 0} # Necesito saber en qué posición van las fichas de X valor, para cada jugador
             chip_dict['dragged'] = False
             chips.append(chip_dict)
+
+def confirm_bet():
+    pass
+
+def show_info():
+    pass
+
+def hide_info():
+    pass
 
 if __name__ == '__main__':
     init_players()

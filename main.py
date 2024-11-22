@@ -59,28 +59,67 @@ def app_events():
 def app_run():
     delta_time = clock.get_time() / 1000.0
 
-    if utils.is_point_in_rect(mouse, spin_button) and not roulette["spinning"]:
-        if mouse["pressed"]:
-            # La ruleta gira una miqueta com a anticipació per fer efecte
-            roulette["spin_speed"] = -50
-            roulette["about_to_spin"] = True
-        if mouse["released"] and roulette["about_to_spin"]:
-            acc = abs(roulette["spin_acc"])
-            angular_displacement = (54 + random.randint(1,37)) * 360/37 #Gira entre 55 i 91 números
-            roulette["spin_speed"] = math.sqrt(angular_displacement*2/acc)*acc #Càlcul MCUA
-            roulette["spinning"] = True
-            roulette["about_to_spin"] = False
-    elif roulette["about_to_spin"]:
-        # Si el mouse es mou fora del botó abans de deixar anar, la ruleta torna a la seva posició inicial
-        roulette["spin_speed"] = math.sqrt((-50)**2 - roulette["spin_speed"]**2) #Càlcul MCUA
-        roulette["about_to_spin"] = False
-        roulette["spin_canceled"] = True
+    if current_mode["betting"]:
+        if utils.is_point_in_rect(mouse, bet_button) and bet_button["enabled"]:
+            if mouse["pressed"]:
+                bet_button["pressed"] = True
+            elif mouse["released"] and bet_button["pressed"]:
+                bet_button["pressed"] = False
+                confirm_bet()
+                player_i = player_names.index(current_player["name"])
+                if player_i < 2:
+                    current_player["name"] = player_names[player_i+1]
+                else:
+                    current_player["name"] = player_names[0]
+                    current_mode["betting"] = False
+                    current_mode["roulette"] = True
 
-    if roulette["spin_speed"] != 0:
-        spin_roulette(delta_time)
-    elif roulette["readjusting"]:
-        readjust_roulette()
-        spin_counter["n"] += 1
+    elif current_mode["roulette"]:
+        if utils.is_point_in_rect(mouse, spin_button) and not roulette["spinning"]:
+            if mouse["pressed"]:
+                # La ruleta gira una miqueta com a anticipació per fer efecte
+                roulette["spin_speed"] = -50
+                roulette["about_to_spin"] = True
+            if mouse["released"] and roulette["about_to_spin"]:
+                acc = abs(roulette["spin_acc"])
+                angular_displacement = (54 + random.randint(1,37)) * 360/37 #Gira entre 55 i 91 números
+                roulette["spin_speed"] = math.sqrt(angular_displacement*2/acc)*acc #Càlcul MCUA
+                roulette["spinning"] = True
+                roulette["about_to_spin"] = False
+        elif roulette["about_to_spin"]:
+            # Si el mouse es mou fora del botó abans de deixar anar, la ruleta torna a la seva posició inicial
+            roulette["spin_speed"] = math.sqrt((-50)**2 - roulette["spin_speed"]**2) #Càlcul MCUA
+            roulette["about_to_spin"] = False
+            roulette["spin_canceled"] = True
+
+        if roulette["spin_speed"] != 0:
+            spin_roulette(delta_time)
+        elif roulette["readjusting"]:
+            readjust_roulette()
+
+    """
+    else:
+        if utils.is_point_in_rect(mouse, close_button):
+            if mouse["pressed"]:
+                hide_info()
+                if current_mode["roulette"] == None:
+                    current_mode["roulette"] = True
+                else:
+                    current_mode["betting"] = True
+                current_mode["info"] = False
+
+    #if utils.is_point_in_rect(mouse, info_button) and not current_mode["info"]:
+        if mouse["pressed"]:
+                info_button["pressed"] = True
+            elif mouse["released"] and info_button["pressed"]:
+                info_button["pressed"] = False
+                show_info()
+                if current_mode["roulette"]:
+                    current_mode["roulette"] = None
+                else:
+                    current_mode["betting"] = None
+                current_mode["info"] = True
+    """
 
     mouse["pressed"] = False
     mouse["released"] = False
@@ -106,7 +145,7 @@ def app_draw():
     # Dibuixar la ruleta
     screen.blit(roulette_surface, roulette["position"])
 
-    #Dibuixar botó de gir
+    # Dibuixar botó de gir
     draw_spin_button()
     
     # Línia de separació
@@ -114,6 +153,9 @@ def app_draw():
     
     # Dibuixar taula
     screen.blit(board_surface, (board["x"], board["y"]))
+
+    # Dibuixar botó d'apostar
+    draw_bet_button()
 
     # Dibuixar graella dels jugadors
     screen.blit(player_grid_surface, (player_grid["x"], player_grid["y"]))
