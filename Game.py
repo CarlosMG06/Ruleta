@@ -116,15 +116,16 @@ def init_chips():
     chips = []
     for player_name in players:
         for chip in players[player_name]:
-            chip_dict = {}
-            chip_dict['value'] = int(chip)
-            chip_dict['owner'] = player_name
-            chip_name = str(chip_dict['value'])
-            chip_dict['pos'] = {'x': chips_positions[chip_name]['x'], 'y': chips_positions[chip_name]['y']}
-            chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
-            chip_dict['dragged'] = False
-            chip_dict['current cell'] = 'owner'
-            chips.append(chip_dict)
+            for i in range(players[player_name][chip]):
+                chip_dict = {}
+                chip_dict['value'] = int(chip)
+                chip_dict['owner'] = player_name
+                chip_name = str(chip_dict['value'])
+                chip_dict['pos'] = {'x': chips_positions[chip_name]['x'], 'y': chips_positions[chip_name]['y']}
+                chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
+                chip_dict['dragged'] = False
+                chip_dict['current cell'] = 'owner'
+                chips.append(chip_dict)
     return chips
 
 def any_chip_dragged():
