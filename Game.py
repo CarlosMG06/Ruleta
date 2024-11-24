@@ -1,5 +1,5 @@
 from GameData import *
-from UI_Data import roulette, board_cell_areas
+from UI_Data import *
 import math
 import utils
 
@@ -105,9 +105,16 @@ def init_chips():
     
     La estructura de cada diccionario es:
     {'owner': str, 'value': int, 'pos': {'x': int, 'y': int}, 'dragged': bool}'''
-    global chips
-    chips = []
+    global chips, chips_positions
+    cols, rows = player_grid["columns"], player_grid["rows"]
+    c_w, c_h = player_grid["cell"]["width"], player_grid["cell"]["height"]
+    c_1w, c_1h = player_grid["cell"]["1st_w"], player_grid["cell"]["1st_h"]
+    for i in range(len(chip_values)):
+        chip_x = player_grid['x'] + c_1w + c_w/2 + c_w*i
+        chip_y = player_grid['y'] + c_1h/2
+        chips_positions[str(chip_values[i])] = {'x':chip_x, 'y':chip_y}
 
+    chips = []
     for player_name in players:
         for chip in players[player_name]:
             chip_dict = {}

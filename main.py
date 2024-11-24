@@ -30,12 +30,16 @@ def main():
     players = init_players()
     chips = init_chips()
 
+    tmp = True
+
     while is_looping:
         is_looping = app_events()
         app_run()
         app_draw()
-        print(players)
-        print(chips_positions)
+        if tmp:
+            print(players)
+            print(chips_positions)
+            tmp = False
 
         clock.tick(60) # Limitar a 60 FPS
 
@@ -212,8 +216,8 @@ def app_draw():
     '''for chip in chips_positions:
         center = (chips_positions[chip]['x'], chips_positions[chip]['y'])
         color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
-        pygame.draw.circle(screen, color, center, 10)'''
-
+        pygame.draw.circle(screen, color, center, 5)'''
+    
     # Dibuixar fitxes
     for chip in chips:
         draw_chip(chip)
