@@ -156,8 +156,8 @@ def app_run():
                             break
                     if not valid:
                         '''print(f'Posición NO válida! Devolviendo ficha a la posición base...')'''
-                        chip['pos']['x'] = 100
-                        chip['pos']['y'] = 100
+                        chip['pos']['x'] = chips_positions[str(chip['value'])]['x']
+                        chip['pos']['y'] = chips_positions[str(chip['value'])]['y']
             release_all_chips()
         else:
             for chip in chips:
