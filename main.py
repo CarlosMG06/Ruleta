@@ -37,7 +37,7 @@ def main():
         app_run()
         app_draw()
         if tmp:
-            print(players)
+            print(chips)
             print(chips_positions)
             tmp = False
 
