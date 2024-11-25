@@ -183,12 +183,14 @@ def set_chips_destination():
 
 def move_chips():
     '''Mueve cada una de las fichas del array 'chips' a la posición que le toca.'''
+    # COMPRUEBO SI ESTÁN TODOS COMO 'True' UTILIZANDO:
+    # all_chips_arrived = all(map(lambda x: x['dest']['arrived'], chips))
     for chip in chips:
         if not chip['dest']['arrived']:
             # Calculamos el ángulo
             delta_x = chip['pos']['x'] - chip['dest']['x'] 
             delta_y = chip['pos']['y'] - chip['dest']['y']
-            rad = math.atan(delta_x / delta_y)
+            rad = math.atan(delta_x / delta_y) 
             # Calculamos la variación de posición en función del ángulo
             chip['pos']['x'] += math.sin(rad) * chip_speed
             chip['pos']['y'] += math.sin(rad) * chip_speed
