@@ -31,10 +31,21 @@ def main():
     players = init_players()
     chips = init_chips()
 
+    #tmp = True
+
     while is_looping:
         is_looping = app_events()
         app_run()
         app_draw()
+        """
+        if tmp:
+            print(players)
+            print('---')
+            print(chips)
+            print('---')
+            print(chips_positions)
+            tmp = False
+        """
 
         clock.tick(60) # Limitar a 60 FPS
 
@@ -109,8 +120,8 @@ def app_run():
                                 break
                         if not valid:
                             '''print(f'Posición NO válida! Devolviendo ficha a la posición base...')'''
-                            chip['pos']['x'] = 100
-                            chip['pos']['y'] = 100
+                            chip['pos']['x'] = chips_positions[str(chip['value'])]['x']
+                            chip['pos']['y'] = chips_positions[str(chip['value'])]['y']
                 release_all_chips()
             else:
                 for chip in chips:
@@ -192,7 +203,7 @@ def app_run():
             current_mode["info"] = True
     elif gi_button["pressed"]:
         gi_button["pressed"] = False
-        
+     
     mouse["pressed"] = False
     mouse["released"] = False
 
@@ -238,7 +249,7 @@ def app_draw():
     
     """
     # Muestra regiones del tablero a partir de sus Rect
-    for board_cell in board_cell_areas:
+    '''for board_cell in board_cell_areas:
         color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
         rect_values = (board_cell_areas[board_cell]['rect']['x'], board_cell_areas[board_cell]['rect']['y'], board_cell_areas[board_cell]['rect']['width'], board_cell_areas[board_cell]['rect']['height'])
         pygame.draw.rect(screen, color, rect_values, 3)
@@ -246,6 +257,12 @@ def app_draw():
             pygame.draw.polygon(screen, color, board_cell_areas["0"]['vertices'], 3)
     """
 
+    # Muestra los centros de las posiciones originales de las fichas
+    '''for chip in chips_positions:
+        center = (chips_positions[chip]['x'], chips_positions[chip]['y'])
+        color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
+        pygame.draw.circle(screen, color, center, 5)'''
+    
     # Dibuixar fitxes
     for chip in chips:
         draw_chip(chip)

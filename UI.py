@@ -291,6 +291,7 @@ def update_player_grid():
             
             # Primera fila: fitxes
             elif row == 0:
+                #chips_positions[str(chip_values[col-1])] = {'x': center_x + player_grid['x'], 'y': center_y + player_grid['y']} # Genera diccionario con posiciones de fichas
                 if players[current_player["name"]][f"{chip_values[col-1]:03}"] > 0:
                     draw_chip({"value": f"{chip_values[col-1]:03}", "owner": f"{current_player["name"]}", "pos": (center_x, center_y)}, bet=False)
 

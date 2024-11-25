@@ -105,19 +105,27 @@ def init_chips():
     
     La estructura de cada diccionario es:
     {'owner': str, 'value': int, 'pos': {'x': int, 'y': int}, 'dragged': bool}'''
-    global chips
-    chips = []
+    global chips, chips_positions
+    c_w = player_grid["cell"]["width"]
+    c_1w, c_1h = player_grid["cell"]["1st_w"], player_grid["cell"]["1st_h"]
+    for i in range(len(chip_values)):
+        chip_x = player_grid['x'] + c_1w + c_w/2 + c_w*i
+        chip_y = player_grid['y'] + c_1h/2
+        chips_positions[str(chip_values[i])] = {'x':chip_x, 'y':chip_y}
 
+    chips = []
     for player_name in players:
         for chip in players[player_name]:
-            chip_dict = {}
-            chip_dict['value'] = int(chip)
-            chip_dict['owner'] = player_name
-            chip_dict['pos'] = {'x': 0, 'y': 0} # Necesito saber en qué posición van las fichas de X valor, para cada jugador
-            chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
-            chip_dict['dragged'] = False
-            chip_dict['current cell'] = 'owner'
-            chips.append(chip_dict)
+            for i in range(players[player_name][chip]):
+                chip_dict = {}
+                chip_dict['value'] = int(chip)
+                chip_dict['owner'] = player_name
+                chip_name = str(chip_dict['value'])
+                chip_dict['pos'] = {'x': chips_positions[chip_name]['x'], 'y': chips_positions[chip_name]['y']}
+                chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
+                chip_dict['dragged'] = False
+                chip_dict['current cell'] = 'owner'
+                chips.append(chip_dict)
     return chips
 
 def any_chip_dragged():
