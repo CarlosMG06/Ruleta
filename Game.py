@@ -175,3 +175,25 @@ def show_game_info():
 
 def hide_game_info():
     game_info_chart["visible"] = False
+
+def set_chips_destination():
+    '''Declara a qué posición deben ir las fichas, en función del resultado de la apuesta.'''
+    # Definir clave 'dest' en chips, que tiene como valor un dict del tipo {'x':int, 'y':int, 'arrived':False}
+    pass
+
+def move_chips():
+    '''Mueve cada una de las fichas del array 'chips' a la posición que le toca.'''
+    for chip in chips:
+        if not chip['dest']['arrived']:
+            # Calculamos el ángulo
+            delta_x = chip['pos']['x'] - chip['dest']['x'] 
+            delta_y = chip['pos']['y'] - chip['dest']['y']
+            rad = math.atan(delta_x / delta_y)
+            # Calculamos la variación de posición en función del ángulo
+            chip['pos']['x'] += math.sin(rad) * chip_speed
+            chip['pos']['y'] += math.sin(rad) * chip_speed
+            # Si la ficha está lo suficientemente cerca del destino, decidimos que ya ha llegado
+            if utils.is_point_in_circle(chip['pos'], chip['dest'], r=5):
+                chip['pos']['x'] = chip['dest']['x'] 
+                chip['pos']['y'] = chip['dest']['y']
+                chip['dest']['arrived'] = True
