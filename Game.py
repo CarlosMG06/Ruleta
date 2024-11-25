@@ -109,7 +109,8 @@ def init_chip_positions():
 def init_chips():
     chips.clear()
     for value in chip_values:
-        if players[current_player["name"]][f"{value:03}"] > 0:
+        amount = players[current_player["name"]][f"{value:03}"]
+        for _ in range(amount):
             chip_dict = {}
             chip_dict['value'] = value
             chip_dict['owner'] = current_player["name"]
