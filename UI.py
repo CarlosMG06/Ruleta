@@ -6,11 +6,13 @@ import utils
 import math
 
 font.init()
-font_tiny = font.SysFont("Arial", 10, bold=True)
-font_small = font.SysFont("Arial", 12, bold=True)
-font_medium = font.SysFont("Arial", 15, bold=True)
-font_big = font.SysFont("Arial", 18, bold=True)
-font_huge = font.SysFont("Arial", 27, bold=True)
+font_tiny = font.SysFont("Arial", 12, bold=True)
+font_small = font.SysFont("Arial", 15, bold=True)
+font_small_thin = font.SysFont("Arial", 15)
+font_medium = font.SysFont("Arial", 18, bold=True)
+font_big = font.SysFont("Arial", 27, bold=True)
+font_big_thin = font.SysFont("Arial", 24)
+font_huge = font.SysFont("Arial", 45, bold=True)
 font_serif = font.SysFont("Times New Roman", 21)
 
 def update_current_number():
@@ -20,42 +22,36 @@ def update_current_number():
         if angle + prev_angle < 360/37:
             current_number["n"] = n
             break
-    
-    text = font_big.render(f"Current number: {str(current_number["n"])}", True, WHITE)
-    text_center = (roulette["position"][0] + roulette["radius"], roulette["position"][1] + roulette["radius"]*2 + 20)
-    text_rect = text.get_rect(center = text_center)
-    current_number_text["text"], current_number_text["rect"] = text, text_rect
 
-def draw_spin_button():
-    sb_rect_tuple = (spin_button["x"],spin_button["y"],spin_button["width"],spin_button["height"])
-    
-    fill_color = BLACK
-    border_color = LIGHT_GRAY
-    text_color = WHITE
-    if roulette["about_to_spin"]:
-        fill_color = GOLD
-        border_color = BLACK
-        text_color = BLACK
-    elif roulette["spin_canceled"] or roulette["spinning"] or roulette["readjusting"] or not current_mode["roulette"]:
-        fill_color = DARK_GRAY
-        border_color = GRAY
-        text_color = GRAY
-    
-    draw.rect(screen, fill_color, sb_rect_tuple)
-    draw.rect(screen, border_color, sb_rect_tuple, 2)
-    
-    sb_text = font_big.render("Spin!", True, text_color)
-    center = (spin_button["x"] + spin_button["width"]/2, spin_button["y"] + spin_button["height"]/2)
-    sb_text_rect = sb_text.get_rect(center=center)
-    screen.blit(sb_text, sb_text_rect)
+def draw_current_number():
+    r = roulette["radius"]
+
+    n = current_number["n"]
+    i = number_order.index(n)
+    if i == 0:
+        color = GREEN
+    elif i % 2 == 1:
+        color = RED
+    else:
+        color = BLACK
+
+    draw.rect(roulette_surface, color, (r-40, r-40, 80, 80))
+    draw.rect(roulette_surface, GOLD, (r-40, r-40, 80, 80), 5)
+
+    text = font_huge.render(str(n), True, WHITE)
+    text_rect = text.get_rect(center = (r,r))
+    roulette_surface.blit(text, text_rect)
 
 def update_roulette():
     r = roulette["radius"]
     c = (r,r)
 
     draw.circle(roulette_surface, DARK_GOLD, c, r, 6)
-    draw.circle(roulette_surface, BROWN, c, r-56)
+    draw.circle(roulette_surface, BROWN, c, r-46)
     
+    draw.rect(roulette_surface, DARK_GRAY, (r-40, r-40, 80, 80))
+    draw.rect(roulette_surface, GOLD, (r-40, r-40, 80, 80), 5)
+
     arrow_points = [
     (c[0]+r+8, c[1]),
     (c[0]+r+23, c[1]+8),
@@ -85,34 +81,45 @@ def update_roulette():
         polygon_center = (int((p0[0]+prev_1[0])/2), int((p0[1]+prev_1[1])/2))
 
         text_angle = -angle - 90 + 360/37/2
-        text_n = font_medium.render(str(n), True, WHITE)
+        text_n = font_small.render(str(n), True, WHITE)
         text_n_rotated = rotate(text_n, text_angle)
         text_n_rotated_rect = text_n_rotated.get_rect()
         text_n_rotated_rect.center = polygon_center
         roulette_surface.blit(text_n_rotated, text_n_rotated_rect)
 
-def draw_bet_button():
-    bb_rect_tuple = (bet_button["x"], bet_button["y"], bet_button["width"], bet_button["height"])
+def draw_button(button, spin_button=False, close_button=False):
+    b_rect_tuple = (button["x"], button["y"], button["width"], button["height"])
     
     fill_color = BLACK
     border_color = LIGHT_GRAY
     text_color = WHITE
-    if not bet_button["enabled"]:
-        fill_color = DARK_GRAY
-        border_color = GRAY
-        text_color = GRAY
-    elif bet_button["pressed"]:
+    if button["pressed"]:
         fill_color = GOLD
         border_color = BLACK
         text_color = BLACK
+    elif not button["enabled"]:
+        fill_color = DARK_GRAY
+        border_color = GRAY
+        text_color = GRAY
     
-    draw.rect(screen, fill_color, bb_rect_tuple)
-    draw.rect(screen, border_color, bb_rect_tuple, 2)
+    surface = gi_surface if close_button else screen
+    draw.rect(surface, fill_color, b_rect_tuple)
+    width = button["height"]//15
+    draw.rect(surface, border_color, b_rect_tuple, width)
     
-    bb_text = font_big.render("Bet!", True, text_color)
-    center = (bet_button["x"] + bet_button["width"]/2, bet_button["y"] + bet_button["height"]/2)
-    bb_text_rect = bb_text.get_rect(center=center)
-    screen.blit(bb_text, bb_text_rect)
+    if close_button:
+        p0 = (button["x"] + 4, button["y"] + 4)
+        p1 = (button["x"] + button["width"] - 6, button["y"] + button["height"] - 5)
+        p2 = (p0[0], p1[1])
+        p3 = (p1[0], p0[1])
+        draw.line(surface, text_color, p0, p1, 4)
+        draw.line(surface, text_color, p2, p3, 4)
+    else:
+        b_font = font_big if spin_button else font_medium
+        b_text = b_font.render(button["string"], True, text_color)
+        center = (button["x"] + button["width"]/2, button["y"] + button["height"]/2)
+        b_text_rect = b_text.get_rect(center=center)
+        surface.blit(b_text, b_text_rect)
 
 def init_grid_surface():
     # Abreujar noms
@@ -133,7 +140,7 @@ def init_grid_surface():
 
         center_x = x + c_w / 2 - 1
         center_y = y + c_h / 2
-        text_n = font_big.render(str(n), True, WHITE)
+        text_n = font_medium.render(str(n), True, WHITE)
         text_n_rotated =  rotate(text_n, 90)
         text_n_rotated_rect = text_n_rotated.get_rect(center=(center_x, center_y))
         grid_surface.blit(text_n_rotated, text_n_rotated_rect)
@@ -196,7 +203,7 @@ def update_board():
     (grid_x,     grid_y + c_h * 3)]
     draw.lines(board_surface, LIGHT_GRAY, False, zero_points, 3)
 
-    text_zero = font_huge.render("0", True, WHITE, DARK_GREEN)
+    text_zero = font_big.render("0", True, WHITE, DARK_GREEN)
     text_zero_rotated = rotate(text_zero, 90)
     text_zero_rotated_rect = text_zero_rotated.get_rect(center = (grid_x*5/9, zero_points[2][1]))
     board_surface.blit(text_zero_rotated, text_zero_rotated_rect)
@@ -232,7 +239,7 @@ def update_board():
         y = grid_y + c_h * col
         
         center = (x + c_w/2, y + c_h/2)
-        text = font_medium.render("2 : 1", True, WHITE, DARK_GREEN)
+        text = font_small.render("2 : 1", True, WHITE, DARK_GREEN)
         text_rotated = rotate(text, 90)
         text_rotated_rect = text_rotated.get_rect(center=center)
         board_surface.blit(text_rotated, text_rotated_rect)
@@ -294,14 +301,14 @@ def update_player_grid():
                     case "taronja": color = ORANGE
                     case "blau": color = BLUE
                     case "lila": color = PURPLE
-                text = font_medium.render(name, True, color, DARK_GREEN)
+                text = font_small.render(name, True, color, DARK_GREEN)
                 text_rect = text.get_rect(center=(center_x,center_y))
                 player_grid_surface.blit(text, text_rect)
             
             # Quantitats de fitxes de cada jugador
             else:
                 amount = players[player_names[row-1]][f"{chip_values[col-1]:03}"]
-                text = font_medium.render(f"× {str(amount)}", True, WHITE, DARK_GREEN)
+                text = font_small.render(f"× {str(amount)}", True, WHITE, DARK_GREEN)
                 text_rect = text.get_rect(center=(center_x,center_y))
                 player_grid_surface.blit(text, text_rect)
             
@@ -333,7 +340,7 @@ def draw_chip(chip_dict, bet=True):
 
     draw.circle(surface, bg_color, pos, radius)
 
-    text_font = font_small
+    text_font = font_tiny
     text = text_font.render(str(value), True, color)
     text_rect = text.get_rect(center=pos)
     surface.blit(text, text_rect)
@@ -358,4 +365,85 @@ def draw_chip(chip_dict, bet=True):
         inner_border_width += 1
     draw.circle(surface, color, pos, radius, border_width)
     draw.circle(surface, color, pos, radius*2/3, inner_border_width)   
-    
+
+def init_game_info_surface():
+    # Finestra
+    window_tuple = (gi_window["x"], gi_window["y"], gi_window["width"], gi_window["height"])
+    draw.rect(gi_surface, DARK_GRAY, window_tuple)
+    draw.rect(gi_surface, WHITE, window_tuple, 3)
+
+    # Columnes
+    col_y = 80
+    subcol_y = 95
+    header_line_y = 100
+    p0 = (game_info_chart["x"], header_line_y)
+    p1 = (game_info_chart["x"] + game_info_chart["width"], header_line_y)
+    draw.line(gi_surface, LIGHT_GRAY, p0, p1, 3)
+    for i, key in enumerate(game_info_keys):
+        string = key.capitalize()
+        col_text = font_medium.render(string, True, WHITE)
+        match i:
+            case 0: 
+                col_x = game_info_chart["x"] + 40
+                col_line_x = col_x + 40
+            case 1: 
+                col_x = game_info_chart["x"] + 200
+                col_line_x = col_x + 120
+            case 2: 
+                col_x = game_info_chart["x"] + 440
+        col_text_rect = col_text.get_rect(centerx = col_x, bottom = col_y)
+        gi_surface.blit(col_text, col_text_rect)
+        if i != 2:
+            p0 = (col_line_x, 55)
+            p1 = (col_line_x, game_info_chart["y"] + game_info_chart["height"])
+            draw.line(gi_surface, LIGHT_GRAY, p0, p1, 3)
+        if i != 0:
+            for i, name in enumerate(player_names):
+                match name:
+                    case "taronja": color = ORANGE
+                    case "blau": color = BLUE
+                    case "lila": color = PURPLE
+                subcol_text = font_small.render(name, True, color)
+                subcol_x = col_x + 80 * (i-1)
+                subcol_text_rect = subcol_text.get_rect(centerx = subcol_x, bottom = subcol_y)
+                gi_surface.blit(subcol_text, subcol_text_rect)
+
+def update_game_info_chart():
+    gi_chart_surface = Surface((game_info_chart["width"], 48 * len(game_info)), SRCALPHA)
+    gi_chart_surface.fill(DARK_GRAY)
+    for i, round_info in enumerate(game_info):
+        y = 24 + 48 * i
+        text_result = font_big_thin.render(str(round_info["result"]), True, WHITE, DARK_GRAY)
+        text_result_rect = text_result.get_rect(center = (40, y))
+        gi_chart_surface.blit(text_result, text_result_rect)
+
+        for i, bet_dict in enumerate(round_info["bets"]):
+            x = 120 + 80 * i
+            text_chips = font_small_thin.render(f"{bet_dict["chips"]} chips", True, WHITE, DARK_GRAY)
+            text_chips_rect = text_chips.get_rect(center = (x, y - 10))
+            gi_chart_surface.blit(text_chips, text_chips_rect)
+            text_bet_on = font_small_thin.render(f"on {bet_dict["bet_on"]}", True, WHITE, DARK_GRAY)
+            text_bet_on_rect = text_bet_on.get_rect(center = (x, y + 10))
+            gi_chart_surface.blit(text_bet_on, text_bet_on_rect)
+        
+        for i, credit in enumerate(round_info["credits"]):
+            text_credit = font_big_thin.render(str(credit), True, WHITE, DARK_GRAY)
+            text_credit_rect = text_credit.get_rect(center = (360 + 80 * i, y))
+            gi_chart_surface.blit(text_credit, text_credit_rect)
+    draw.line(gi_chart_surface, LIGHT_GRAY, (80, 0), (80, gi_chart_surface.get_height()), 3)
+    draw.line(gi_chart_surface, LIGHT_GRAY, (320, 0), (320, gi_chart_surface.get_height()), 3)
+
+    if gi_scroll["visible"]:
+        sub_surface = gi_chart_surface.subsurface((0, gi_scroll["surface_offset"], gi_chart_surface.get_width(), gi_scroll["visible_height"]))
+        gi_surface.blit(sub_surface, (game_info_chart["x"], game_info_chart["y"]))
+    else:
+        gi_surface.blit(gi_chart_surface, (game_info_chart["x"], game_info_chart["y"]))
+
+def draw_scroll():
+    rect_tuple = (gi_scroll["x"], gi_scroll["y"], gi_scroll["width"], gi_scroll["height"])
+    draw.rect(screen, GRAY, rect_tuple)
+
+    circle_x = int(gi_scroll["x"] + gi_scroll["width"] / 2)
+    circle_y = int(gi_scroll["y"] + (gi_scroll["percentage"] / 100) * gi_scroll["height"])
+    circle_tuple = (circle_x, circle_y)
+    draw.circle(screen, WHITE, circle_tuple, gi_scroll["radius"])

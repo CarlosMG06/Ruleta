@@ -1,4 +1,4 @@
-from pygame import Surface, display
+from pygame import Surface, display, SRCALPHA
 
 screen = display.set_mode((800, 450))
 display.set_caption('Window Title')
@@ -18,7 +18,7 @@ PURPLE = (128, 51, 221)
 ORANGE = (255, 102, 0) 
 BROWN = (102, 68, 34)
 
-current_number_text = {"text": None, "rect": None}
+BLACK_ALPHA = (0, 0, 0, 192)
 
 number_order = [
     0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27,
@@ -28,16 +28,17 @@ number_order = [
 # Ruleta
 roulette = {"position": (10,10), "radius": 150,
 "angle_offset": 360/37/2, "spin_speed": 0, "spin_acc": -100,
-"about_to_spin": False, "spin_canceled": False, "spinning": False, "readjusting": False}
+"about_to_spin": False, "spin_canceled": False, "spinning": False, "readjusting": False, "idle": True}
 
 roulette_surface = Surface((roulette["radius"]*2 + 40,roulette["radius"]*2))
 roulette_surface.fill(DARK_GREEN)
 
 # Botó de gir
 spin_button = {
-    "x": roulette["position"][0] + roulette["radius"] - 40,
-    "y": roulette["position"][1] + roulette["radius"] * 2.5 - 15,
-    "width": 80, "height": 30}
+    "x": roulette["position"][0] + roulette["radius"] - 50,
+    "y": roulette["position"][1] + roulette["radius"] * 2.1,
+    "width": 100, "height": 50,
+    "enabled": True, "pressed": False, "string": "Spin!"}
 
 # Taula
 board = {"x": 350, "y": 10, "columns": 4, "rows": 12, "grid_x": 50, "grid_y": 50,
@@ -58,9 +59,11 @@ board_cell_areas = {}
 
 # Botó de confirmar aposta
 bet_button = {
-    "x": board["x"] + board["grid_x"] + board["cell"]["width"]*7 + 5, "y": board["y"] + 5,
-    "width": board["cell"]["width"]*4 - 10, "height": board["grid_y"] - 10,
-    "enabled": True, "pressed": False}
+    "x": board["x"] + board["grid_x"] + board["cell"]["width"]*7 + 5, 
+    "y": board["y"] + 5,
+    "width": board["cell"]["width"]*4 - 10, 
+    "height": board["grid_y"] - 10,
+    "enabled": True, "pressed": False, "string": "Bet!"}
 
 # Graella dels jugadors
 player_grid = {"x": board["x"] + board["grid_x"]/2, "y": 300, "rows": 4, "columns": 6,
@@ -73,3 +76,35 @@ pg_height = player_grid["cell"]["1st_h"] + player_grid["cell"]["height"] * (play
 pg_size = (pg_width, pg_height)
 player_grid_surface = Surface(pg_size)
 player_grid_surface.fill(DARK_GREEN)
+
+# Info rondes
+gi_surface = Surface((800, 450), SRCALPHA)
+gi_surface.fill(BLACK_ALPHA)
+
+gi_window = {"x": 80, "y": 45, "width": 640, "height": 360}
+game_info_chart = {
+    "x": gi_window["x"] + 20, 
+    "y": gi_window["y"] + 60,
+    "width": gi_window["width"] - 80,
+    "height": gi_window["height"] - 70,
+    "visible": False
+}
+
+gi_button = {
+    "x": spin_button["x"],
+    "y": 400, "width": 100, "height": 30,
+    "enabled": True, "pressed": False, "string": "Game Info"}
+
+gi_close_button = {
+    "x": gi_window["x"] + gi_window["width"] - 30, 
+    "y": gi_window["y"] + 10, 
+    "width": 20, "height": 20,
+    "enabled": True, "pressed": False
+}
+
+gi_scroll = {"x": gi_window["x"] + gi_window["width"] - 20, 
+             "y": gi_window["y"] + 55, 
+             "width": 5, "height": 250, 
+             "radius": 10, "percentage": 0, "dragging": False,
+             "surface_offset": 0, "visible_height": game_info_chart["height"],
+             "visible": False}

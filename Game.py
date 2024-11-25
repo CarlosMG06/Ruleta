@@ -1,5 +1,5 @@
 from GameData import *
-from UI_Data import roulette, board_cell_areas
+from UI_Data import *
 import math
 import utils
 
@@ -15,7 +15,7 @@ def spin_roulette(delta_time):
         elif roulette["readjusting"]:
             roulette["readjusting"] = False
             spin_counter["n"] += 1
-            log_info()
+            log_game_info()
             current_mode["roulette"] = False
             current_mode["betting"] = True
         elif roulette["spin_canceled"]:
@@ -135,26 +135,28 @@ def release_all_chips():
 def confirm_bet():
     pass
 
-def log_info():
-    pass
+def log_game_info():
+    global current_bets
+    round_info = {}
+    
+    if current_bets == []:
+        current_bets = [{"chips": 5, "bet_on": "RED"}, {"chips": 100, "bet_on": "7"}, {"chips": 20, "bet_on": "ODD"}]
+    
+    round_info[game_info_keys[0]] = current_number["n"]
+    round_info[game_info_keys[1]] = current_bets
+    credits = []
+    for i, name in enumerate(player_names): 
+        credits.append(total_money_player(name))
+    round_info[game_info_keys[2]] = credits
+    game_info.append(round_info)
 
-def show_info():
-    pass
+    current_bets = []
 
-def hide_info():
-    pass
+def show_game_info():
+    game_info_chart["visible"] = True
+    if len(game_info) > 6:
+       gi_scroll["visible"] = True
+       gi_scroll["percentage"] = 0
 
-if __name__ == '__main__':
-    init_players()
-    init_chips()
-
-    # Test funciónes:
-    # any_chip_dragged()
-    # release_all_chips()
-    '''
-    print(any_chip_dragged())
-    chips[0]['dragged'] = True
-    print(any_chip_dragged())
-    release_all_chips()
-    print(any_chip_dragged())
-    '''
+def hide_game_info():
+    game_info_chart["visible"] = False

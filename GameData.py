@@ -8,8 +8,9 @@ current_player = {"name": "taronja"}
 
 players = {}
 
-current_mode = {"roulette": True, "betting": False, "info": False}
+current_mode = {"betting": True, "roulette": False,  "info": False}
 current_bets = []
 
-# Llista de diccionaris: {"number_result":, "bets":, "credits":}
-info_rounds = []
+# Llista de diccionaris: {"result":, "bets":, "credits":}
+game_info = []
+game_info_keys = ["result", "bets", "credits"]
