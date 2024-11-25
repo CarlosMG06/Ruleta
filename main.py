@@ -11,6 +11,7 @@ from Game import *
 
 mouse = {"x": -1, "y": -1, 
 "pressed": False, "held": False, "released": False}
+drag_offset = {'x': 0, 'y': 0}
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -18,34 +19,21 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((800, 450))
 pygame.display.set_caption('Window Title')
 
-drag_offset = {'x': 0, 'y': 0}
-
 # Bucle de l'aplicació
 def main():
-    global players, chips
     is_looping = True
 
     update_roulette()
     init_grid_surface()
     init_game_info_surface()
-    players = init_players()
-    chips = init_chips()
-
-    #tmp = True
+    init_players()
+    init_chip_positions()
+    init_chips()
 
     while is_looping:
         is_looping = app_events()
         app_run()
         app_draw()
-        """
-        if tmp:
-            print(players)
-            print('---')
-            print(chips)
-            print('---')
-            print(chips_positions)
-            tmp = False
-        """
 
         clock.tick(60) # Limitar a 60 FPS
 
@@ -70,7 +58,6 @@ def app_events():
 
 # Fer càlculs
 def app_run():
-    global chips
     delta_time = clock.get_time() / 1000.0
 
     bet_button["enabled"] = False
@@ -89,7 +76,9 @@ def app_run():
                 player_i = player_names.index(current_player["name"])
                 if player_i < 2:
                     current_player["name"] = player_names[player_i+1]
+                    init_chips()
                 else:
+                    chips.clear()
                     current_player["name"] = player_names[0]
                     current_mode["betting"] = False
                     current_mode["roulette"] = True
@@ -120,8 +109,8 @@ def app_run():
                                 break
                         if not valid:
                             '''print(f'Posición NO válida! Devolviendo ficha a la posición base...')'''
-                            chip['pos']['x'] = chips_positions[str(chip['value'])]['x']
-                            chip['pos']['y'] = chips_positions[str(chip['value'])]['y']
+                            chip['pos']['x'] = chips_initial_positions[str(chip['value'])]['x']
+                            chip['pos']['y'] = chips_initial_positions[str(chip['value'])]['y']
                 release_all_chips()
             else:
                 for chip in chips:
@@ -247,15 +236,15 @@ def app_draw():
     # Dibuixar graella dels jugadors
     screen.blit(player_grid_surface, (player_grid["x"], player_grid["y"]))
     
-    """
+    
     # Muestra regiones del tablero a partir de sus Rect
-    '''for board_cell in board_cell_areas:
+    for board_cell in board_cell_areas:
         color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
         rect_values = (board_cell_areas[board_cell]['rect']['x'], board_cell_areas[board_cell]['rect']['y'], board_cell_areas[board_cell]['rect']['width'], board_cell_areas[board_cell]['rect']['height'])
         pygame.draw.rect(screen, color, rect_values, 3)
-        if board_cell == '0':
-            pygame.draw.polygon(screen, color, board_cell_areas["0"]['vertices'], 3)
-    """
+        if board_cell in ("0", "col1", "col2", "col3"):
+            pygame.draw.polygon(screen, color, board_cell_areas[board_cell]['vertices'], 3)
+    
 
     # Muestra los centros de las posiciones originales de las fichas
     '''for chip in chips_positions:

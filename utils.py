@@ -15,20 +15,6 @@ def is_point_in_rect(point, rectangle):
     return (rectangle["x"] <= point["x"] <= rectangle["x"] + rectangle["width"] and
             rectangle["y"] <= point["y"] <= rectangle["y"] + rectangle["height"])
 
-def is_point_in_right_triangle(point, hypotenuse, orientation):
-    p1, p2 = hypotenuse
-    width = abs(p1[0]-p2[0])
-    height = abs(p1[1]-p2[1])
-    match orientation:
-        case "top_left":
-            return point["x"]*height + point["y"]*width - width*height < 0
-        case "bottom_right":
-            return point["x"]*height + point["y"]*width - width*height > 0
-        case "top_right":
-            return point["x"]*height + point["y"]*width > 0
-        case "bottom_left":
-            return point["x"]*height + point["y"]*width < 0
-
 def triangle_area(x1, y1, x2, y2, x3, y3):
     '''Calcula el area de un triángulo a partir de sus vértices.'''
     return abs(x1*(y2-y3) + x2*(y3-y1) + x3*(y1-y2)) / 2

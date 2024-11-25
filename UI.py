@@ -196,11 +196,11 @@ def update_board():
     
     # Espai de zero
     zero_points = [
-    (grid_x,     grid_y + 1),
-    (grid_x*2/3, grid_y + 1),
-    (0,          grid_y + c_h * 1.5),
-    (grid_x*2/3, grid_y + c_h * 3),
-    (grid_x,     grid_y + c_h * 3)]
+    [grid_x,     grid_y + 1],
+    [grid_x*2/3, grid_y + 1],
+    [0,          grid_y + c_h * 1.5],
+    [grid_x*2/3, grid_y + c_h * 3],
+    [grid_x,     grid_y + c_h * 3]]
     draw.lines(board_surface, LIGHT_GRAY, False, zero_points, 3)
 
     text_zero = font_big.render("0", True, WHITE, DARK_GREEN)
@@ -208,17 +208,13 @@ def update_board():
     text_zero_rotated_rect = text_zero_rotated.get_rect(center = (grid_x*5/9, zero_points[2][1]))
     board_surface.blit(text_zero_rotated, text_zero_rotated_rect)
 
-    
+    for i in range(len(zero_points)):
+        zero_points[i][0] += board["x"]
+        zero_points[i][1] += board["y"]
     board_cell_areas["0"] = {
-        "rect": {"x": grid_x*2/3 + board["x"], "y": grid_y + 1 + board["y"], "width": grid_x/3, "height": c_h * 3 - 1},
-        "tri1": zero_points[1:3], "tri2": zero_points[2:4]
+        "rect": {"x": zero_points[1][0], "y": zero_points[1][1], "width": zero_points[0][0] - zero_points[3][0], "height": zero_points[3][1] - zero_points[0][1]},
+        "vertices": zero_points[1:4]
         }
-    vertices = [
-        (board_cell_areas['0']['rect']['x'], board_cell_areas['0']['rect']['y']),
-        (board_cell_areas['0']['rect']['x'], board_cell_areas['0']['rect']['y'] + c_h * 3),
-        (board_cell_areas['0']['rect']['x'] - board['grid_x']*(2/3), board_cell_areas['0']['rect']['y'] + c_h * 1.5)
-    ]
-    board_cell_areas['0']['vertices'] = vertices
 
     # Graella
     board_surface.blit(grid_surface, (grid_x, grid_y))
@@ -234,8 +230,8 @@ def update_board():
     board_surface.blit(text_house, text_house_rect)
 
     # Espais de columnes
+    x = grid_x + c_w * rows
     for col in range(3):
-        x = grid_x + c_w * rows
         y = grid_y + c_h * col
         
         center = (x + c_w/2, y + c_h/2)
@@ -245,19 +241,22 @@ def update_board():
         board_surface.blit(text_rotated, text_rotated_rect)
 
         center = (center[0] - 1, center[1] + 1)
-        points = [(x, y+1),
-        (x + c_w*0.9, y+1),
-        (x + c_w*1.4, y + c_h/2),
-        (x + c_w*0.9, y + c_h),
-        (x, y + c_h)]
+        points = [[x, y+1],
+        [x + c_w*0.9, y+1],
+        [x + c_w*1.4, y + c_h/2],
+        [x + c_w*0.9, y + c_h],
+        [x, y + c_h]]
         
-        if col != 0: points.pop(0)
-        draw.lines(board_surface, LIGHT_GRAY, False, points, 3)
+        lines_points = points if col == 0 else points[1:]
+        draw.lines(board_surface, LIGHT_GRAY, False, lines_points, 3)
 
-        '''board_cell_areas[f"col{col+1}"] = {
-            "rect": {"x": x, "y": y, "width": c_w * 0.9, "height": c_h - 1},
-            "tri1": points[1:3], "tri2": points[2:4]
-        }'''
+        for i in range(len(points)):
+            points[i][0] += board["x"]
+            points[i][1] += board["y"]
+        board_cell_areas[f"col{col+1}"] = {
+            "rect": {"x": points[0][0], "y": points[0][1], "width": points[3][0] - points[0][0], "height": points[3][1] - points[0][1]},
+            "vertices": points[1:4]
+        }
 
     #draw_bets()
 
@@ -284,16 +283,10 @@ def update_player_grid():
         for col in range(cols):
             x = 0 if col == 0 else c_1w + c_w * (col-1)
             center_x = x + c_1w/2 if col == 0 else x + c_w/2
-
-            # Primera cel·la: res
-            if row == 0 and col == 0:
-                continue
             
-            # Primera fila: fitxes
-            elif row == 0:
-                #chips_positions[str(chip_values[col-1])] = {'x': center_x + player_grid['x'], 'y': center_y + player_grid['y']} # Genera diccionario con posiciones de fichas
-                if players[current_player["name"]][f"{chip_values[col-1]:03}"] > 0:
-                    draw_chip({"value": f"{chip_values[col-1]:03}", "owner": f"{current_player["name"]}", "pos": (center_x, center_y)}, bet=False)
+            # Primera fila: res
+            if row == 0:
+                continue
 
             # Primera columna: noms dels jugadors
             elif col == 0:
@@ -312,39 +305,26 @@ def update_player_grid():
                 text = font_small.render(f"× {str(amount)}", True, WHITE, DARK_GREEN)
                 text_rect = text.get_rect(center=(center_x,center_y))
                 player_grid_surface.blit(text, text_rect)
-            
-            
 
-    #for name, dict in players.items():
-
-def draw_chip(chip_dict, bet=True):
+def draw_chip(chip_dict):
     value = int(chip_dict["value"])
     owner = chip_dict["owner"]
-
-    # BORRAR EL 'if' CUANDO YA NO SE UTILICEN LAS FICHAS DE EJEMPLO EN main.py
-    # Y omitir el 'else' y mantener la declaración de 'pos'
-    if type(chip_dict['pos']) is tuple:
-        pos = chip_dict["pos"]
-    else:
-        pos = tuple(chip_dict['pos'].values()) # Mantener esta linea!
-    
-    surface = screen if bet else player_grid_surface
+    pos = tuple(chip_dict['pos'].values())
 
     match owner:
         case "taronja": bg_color = ORANGE
         case "blau": bg_color = BLUE
         case "lila": bg_color = PURPLE
-        #case "banca": bg_color = WHITE
     color = (bg_color[0]/2, bg_color[1]/2, bg_color[2]/2)
 
     radius = 8 + int(math.log2(value)*2)
 
-    draw.circle(surface, bg_color, pos, radius)
+    draw.circle(screen, bg_color, pos, radius)
 
     text_font = font_tiny
     text = text_font.render(str(value), True, color)
     text_rect = text.get_rect(center=pos)
-    surface.blit(text, text_rect)
+    screen.blit(text, text_rect)
 
     for i in range(8):    
         angle = 360/8 * (i + 0.25)
@@ -355,17 +335,17 @@ def draw_chip(chip_dict, bet=True):
         p2 = utils.point_on_circle(pos, radius-1, angle)
         p3 = utils.point_on_circle(pos, radius*2/3, angle)
 
-        polygon_color = LIGHT_GRAY if i % 2 == 0 else DARK_GRAY #if bg_color != WHITE and i % 2 == 0 else DARK_GRAY
+        polygon_color = LIGHT_GRAY if i % 2 == 0 else DARK_GRAY
         points = [p0,p1,p2,p3]
-        draw.polygon(surface, polygon_color, points)  
+        draw.polygon(screen, polygon_color, points)  
 
     border_width = 2
     inner_border_width = 1
     if value >= 50:
         border_width += 1
         inner_border_width += 1
-    draw.circle(surface, color, pos, radius, border_width)
-    draw.circle(surface, color, pos, radius*2/3, inner_border_width)   
+    draw.circle(screen, color, pos, radius, border_width)
+    draw.circle(screen, color, pos, radius*2/3, inner_border_width)   
 
 def init_game_info_surface():
     # Finestra

@@ -57,7 +57,7 @@ board_surface.fill(DARK_GREEN)
 
 board_cell_areas = {}
 
-chips_positions = {}
+chips_initial_positions = {}
 
 # Botó de confirmar aposta
 bet_button = {

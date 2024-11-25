@@ -15,9 +15,11 @@ def spin_roulette(delta_time):
         elif roulette["readjusting"]:
             roulette["readjusting"] = False
             spin_counter["n"] += 1
+            give_out_prizes()
             log_game_info()
             current_mode["roulette"] = False
             current_mode["betting"] = True
+            init_chips()
         elif roulette["spin_canceled"]:
             roulette["spin_canceled"] = False
         roulette["angle_offset"] %= 360
@@ -40,18 +42,14 @@ def readjust_roulette():
 
 def init_players():
     '''Inicia el diccionario que contiene información de los jugadores.'''
-    global players
-
     starting_chips = list(zip(chip_values, (0,1,1,2,2))) # Las tuplas son: (NomFicha, Cantidad)
-    
     for name in player_names:
         player_dict = {}
-        for ficha in starting_chips:
-            chip_value = f'{ficha[0]:03}'
-            chip_amount = ficha[1]
+        for chip in starting_chips:
+            chip_value = f'{chip[0]:03}'
+            chip_amount = chip[1]
             player_dict[chip_value] = chip_amount
         players[name] = player_dict
-    return players
 
 def total_money_player(player_name):
     '''Devuelve el dinero total que tiene el jugador, a partir de sus fichas'''
@@ -90,9 +88,9 @@ def valid_chip_position(chip, cell):
     Input:
         -chip(dict): chip dentro de el array chips
         -cell(str): representa la celda del tablero ('0', '27', 'ODD', 'RED', etc.)'''
-    chip_in_cell= utils.is_point_in_rect(chip['pos'], board_cell_areas[cell]['rect'])
-    chip_in_triangle = False # Esta condicion sólo es relevante si estamos en la casilla '0'
-    if cell == '0':
+    chip_in_cell = utils.is_point_in_rect(chip['pos'], board_cell_areas[cell]['rect'])
+    chip_in_triangle = False
+    if cell in ['0', 'col1', 'col2', 'col3']:
         chip_in_triangle = utils.is_point_in_triangle(chip['pos'], board_cell_areas[cell]['vertices'])
     if chip_in_cell or chip_in_triangle:
         '''print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')'''
@@ -100,33 +98,26 @@ def valid_chip_position(chip, cell):
     '''print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')'''
     return False
 
-def init_chips():
-    '''Genera un array de diccionarios, donde cada diccionario contiene información de cada ficha.
-    
-    La estructura de cada diccionario es:
-    {'owner': str, 'value': int, 'pos': {'x': int, 'y': int}, 'dragged': bool}'''
-    global chips, chips_positions
+def init_chip_positions():
     c_w = player_grid["cell"]["width"]
     c_1w, c_1h = player_grid["cell"]["1st_w"], player_grid["cell"]["1st_h"]
     for i in range(len(chip_values)):
         chip_x = player_grid['x'] + c_1w + c_w/2 + c_w*i
         chip_y = player_grid['y'] + c_1h/2
-        chips_positions[str(chip_values[i])] = {'x':chip_x, 'y':chip_y}
+        chips_initial_positions[str(chip_values[i])] = {'x':chip_x, 'y':chip_y}
 
-    chips = []
-    for player_name in players:
-        for chip in players[player_name]:
-            for i in range(players[player_name][chip]):
-                chip_dict = {}
-                chip_dict['value'] = int(chip)
-                chip_dict['owner'] = player_name
-                chip_name = str(chip_dict['value'])
-                chip_dict['pos'] = {'x': chips_positions[chip_name]['x'], 'y': chips_positions[chip_name]['y']}
-                chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
-                chip_dict['dragged'] = False
-                chip_dict['current cell'] = 'owner'
-                chips.append(chip_dict)
-    return chips
+def init_chips():
+    chips.clear()
+    for value in chip_values:
+        if players[current_player["name"]][f"{value:03}"] > 0:
+            chip_dict = {}
+            chip_dict['value'] = value
+            chip_dict['owner'] = current_player["name"]
+            chip_dict['pos'] = {'x': chips_initial_positions[str(value)]['x'], 'y': chips_initial_positions[str(value)]['y']}
+            chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
+            chip_dict['dragged'] = False
+            chip_dict['current_cell'] = 'owner'
+            chips.append(chip_dict)
 
 def any_chip_dragged():
     '''Devuelve True si alguna ficha está siendo arrastrada'''
@@ -141,6 +132,9 @@ def release_all_chips():
         chip['dragged'] = False
 
 def confirm_bet():
+    pass
+
+def give_out_prizes():
     pass
 
 def log_game_info():

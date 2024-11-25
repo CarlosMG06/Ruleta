@@ -7,6 +7,7 @@ player_names = ["taronja", "blau", "lila"]
 current_player = {"name": "taronja"}
 
 players = {}
+chips = []
 
 current_mode = {"betting": True, "roulette": False,  "info": False}
 current_bets = []
