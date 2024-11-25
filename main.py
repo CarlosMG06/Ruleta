@@ -65,7 +65,10 @@ def app_run():
     gi_button["enabled"] = not current_mode["info"] and spin_counter["n"] > 0
 
     if current_mode["betting"]:
-        bet_button["enabled"] = True
+        for chip in chips:
+            if chip["current_cell"] != 'owner':
+                bet_button["enabled"] = True
+                break
 
         if utils.is_point_in_rect(mouse, bet_button) and bet_button["enabled"]:
             if mouse["pressed"]:
@@ -97,18 +100,20 @@ def app_run():
                     break
         else:
             if mouse["released"]:
-                for chip in chips:
+                for i, chip in enumerate(chips):
                     if chip['dragged'] == True:
                         for board_cell in board_cell_areas:
                             valid = False
-                            if valid_chip_position(chip, board_cell):
+                            if valid_chip_position(i, chip, board_cell):
                                 valid = True
+                                chip["current_cell"] = board_cell
                                 '''print(f'Posición válida!')
                                 print(f'Nombre casilla: {board_cell}')
                                 print(f'Contenido de su diccionario: {board_cell_areas[board_cell]}')'''
                                 break
                         if not valid:
                             '''print(f'Posición NO válida! Devolviendo ficha a la posición base...')'''
+                            chip["current_cell"] = 'owner'
                             chip['pos']['x'] = chips_initial_positions[str(chip['value'])]['x']
                             chip['pos']['y'] = chips_initial_positions[str(chip['value'])]['y']
                 release_all_chips()
@@ -236,15 +241,15 @@ def app_draw():
     # Dibuixar graella dels jugadors
     screen.blit(player_grid_surface, (player_grid["x"], player_grid["y"]))
     
-    
     # Muestra regiones del tablero a partir de sus Rect
+    """
     for board_cell in board_cell_areas:
         color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
         rect_values = (board_cell_areas[board_cell]['rect']['x'], board_cell_areas[board_cell]['rect']['y'], board_cell_areas[board_cell]['rect']['width'], board_cell_areas[board_cell]['rect']['height'])
         pygame.draw.rect(screen, color, rect_values, 3)
         if board_cell in ("0", "col1", "col2", "col3"):
             pygame.draw.polygon(screen, color, board_cell_areas[board_cell]['vertices'], 3)
-    
+    """
 
     # Muestra los centros de las posiciones originales de las fichas
     '''for chip in chips_positions:

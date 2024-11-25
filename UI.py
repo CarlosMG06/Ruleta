@@ -253,7 +253,7 @@ def update_board():
         for i in range(len(points)):
             points[i][0] += board["x"]
             points[i][1] += board["y"]
-        board_cell_areas[f"col{col+1}"] = {
+        board_cell_areas[f"column {3-col}"] = {
             "rect": {"x": points[0][0], "y": points[0][1], "width": points[3][0] - points[0][0], "height": points[3][1] - points[0][1]},
             "vertices": points[1:4]
         }
@@ -400,7 +400,7 @@ def update_game_info_chart():
 
         for i, bet_dict in enumerate(round_info["bets"]):
             x = 120 + 80 * i
-            text_chips = font_small_thin.render(f"{bet_dict["chips"]} chips", True, WHITE, DARK_GRAY)
+            text_chips = font_small_thin.render(f"{bet_dict["units"]} units", True, WHITE, DARK_GRAY)
             text_chips_rect = text_chips.get_rect(center = (x, y - 10))
             gi_chart_surface.blit(text_chips, text_chips_rect)
             text_bet_on = font_small_thin.render(f"on {bet_dict["bet_on"]}", True, WHITE, DARK_GRAY)

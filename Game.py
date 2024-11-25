@@ -82,7 +82,7 @@ def redistribute_player_chips(player_name):
 
     players[player_name] = new_chips_dict
 
-def valid_chip_position(chip, cell):
+def valid_chip_position(chip_index, chip, cell):
     '''Comprueba que la ficha puesta en el tablero de apuestas está en posición válida (True, False).
     
     Input:
@@ -90,9 +90,13 @@ def valid_chip_position(chip, cell):
         -cell(str): representa la celda del tablero ('0', '27', 'ODD', 'RED', etc.)'''
     chip_in_cell = utils.is_point_in_rect(chip['pos'], board_cell_areas[cell]['rect'])
     chip_in_triangle = False
-    if cell in ['0', 'col1', 'col2', 'col3']:
+    if cell in ['0', 'column 1', 'column 2', 'column 3']:
         chip_in_triangle = utils.is_point_in_triangle(chip['pos'], board_cell_areas[cell]['vertices'])
     if chip_in_cell or chip_in_triangle:
+        for i, chip in enumerate(chips):
+            if i == chip_index: continue
+            if chip["current_cell"] not in ('owner', cell):
+                return False
         '''print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')'''
         return True
     '''print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')'''
@@ -133,27 +137,35 @@ def release_all_chips():
         chip['dragged'] = False
 
 def confirm_bet():
-    pass
+    bet_dict = {}
+    units = 0
+    for chip in chips:
+        if chip["current_cell"] != 'owner':
+            bet_dict["bet_on"] = chip["current_cell"]
+            units += chip["value"]
+            players[current_player["name"]][f"{chip["value"]:03}"] -= 1
+    bet_dict["units"] = units
+    current_bets.append(bet_dict)
 
 def give_out_prizes():
     pass
 
 def log_game_info():
-    global current_bets
     round_info = {}
     
-    if current_bets == []:
-        current_bets = [{"chips": 5, "bet_on": "RED"}, {"chips": 100, "bet_on": "7"}, {"chips": 20, "bet_on": "ODD"}]
+    # tmp
+    if len(current_bets) == 0:
+        current_bets.extend([{"units": 5, "bet_on": "RED"}, {"units": 110, "bet_on": "7"}, {"units": 20, "bet_on": "ODD"}])
     
     round_info[game_info_keys[0]] = current_number["n"]
-    round_info[game_info_keys[1]] = current_bets
+    round_info[game_info_keys[1]] = current_bets.copy()
     credits = []
     for i, name in enumerate(player_names): 
         credits.append(total_money_player(name))
     round_info[game_info_keys[2]] = credits
     game_info.append(round_info)
 
-    current_bets = []
+    current_bets.clear()
 
 def show_game_info():
     game_info_chart["visible"] = True
