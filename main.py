@@ -81,7 +81,6 @@ def app_run():
                     current_player["name"] = player_names[player_i+1]
                     init_chips()
                 else:
-                    chips.clear()
                     current_player["name"] = player_names[0]
                     current_mode["betting"] = False
                     current_mode["roulette"] = True

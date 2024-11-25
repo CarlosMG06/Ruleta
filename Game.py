@@ -16,9 +16,11 @@ def spin_roulette(delta_time):
             roulette["readjusting"] = False
             spin_counter["n"] += 1
             give_out_prizes()
+            #move_chips()
             log_game_info()
             current_mode["roulette"] = False
             current_mode["betting"] = True
+            chips.clear()
             init_chips()
         elif roulette["spin_canceled"]:
             roulette["spin_canceled"] = False
@@ -111,7 +113,7 @@ def init_chip_positions():
         chips_initial_positions[str(chip_values[i])] = {'x':chip_x, 'y':chip_y}
 
 def init_chips():
-    chips.clear()
+    
     for value in chip_values:
         amount = players[current_player["name"]][f"{value:03}"]
         for _ in range(amount):
