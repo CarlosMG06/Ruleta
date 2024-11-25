@@ -220,7 +220,7 @@ def update_board():
     board_surface.blit(grid_surface, (grid_x, grid_y))
 
     # Espai de la banca
-    house_rect = (grid_x + c_w + 5, 5, c_w*4 - 10, grid_y - 10)
+    house_rect = [grid_x + c_w + 5, 5, c_w*4 - 10, grid_y - 10]
     draw.rect(board_surface, LIGHT_GRAY, house_rect, 3)
 
     center_x = house_rect[0] + house_rect[2]/2
@@ -228,6 +228,12 @@ def update_board():
     text_house = font_serif.render("HOUSE", True, WHITE, DARK_GREEN)
     text_house_rect = text_house.get_rect(center=(center_x,center_y))
     board_surface.blit(text_house, text_house_rect)
+
+    house_rect[0] += board["x"]
+    house_rect[1] += board["y"]
+    board_cell_areas["house"] = {
+        "rect": {"x": house_rect[0], "y": house_rect[1], "width": house_rect[2], "height": house_rect[3]}
+    }
 
     # Espais de columnes
     x = grid_x + c_w * rows

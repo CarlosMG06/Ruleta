@@ -3,6 +3,20 @@ from UI_Data import *
 import math
 import utils
 
+def next_round():
+    give_out_prizes()
+    for name in player_names:
+        redistribute_player_chips(name)
+    log_game_info()
+    current_mode["moving_chips"] = False
+    current_mode["betting"] = True
+    for name in player_names:
+        chips[name].clear()
+    init_chips()
+
+def move_chips():
+    pass
+
 # Girar la ruleta
 def spin_roulette(delta_time):
     sign = 1 if roulette["spin_speed"] > 0 else -1
@@ -15,13 +29,8 @@ def spin_roulette(delta_time):
         elif roulette["readjusting"]:
             roulette["readjusting"] = False
             spin_counter["n"] += 1
-            give_out_prizes()
-            #move_chips()
-            log_game_info()
             current_mode["roulette"] = False
-            current_mode["betting"] = True
-            chips.clear()
-            init_chips()
+            current_mode["moving_chips"] = True
         elif roulette["spin_canceled"]:
             roulette["spin_canceled"] = False
         roulette["angle_offset"] %= 360
@@ -68,19 +77,13 @@ def redistribute_player_chips(player_name):
     new_chips_dict = {'100': 0, '050': 0, '020': 0, '010': 0, '005': 0}
     player_money = total_money_player(player_name)
     new_chips_total = 0
-    possible_chips = (100, 50, 20, 10, 5)
 
     i = 0
     while new_chips_total < player_money:
-        chip = possible_chips[i]
-        if player_money >= new_chips_total + chip:
-            chip_key = f'{chip:03}'
-            new_chips_dict[chip_key] += 1
-            new_chips_total = sum(new_chips_dict.values())
-
-        i += 1
-        if i == len(possible_chips):
-            i = 0
+        for chip_value in chip_values:
+            if player_money >= new_chips_total + chip_value:
+                new_chips_dict[f"{chip_value:03}"] += 1
+                new_chips_total += chip_value
 
     players[player_name] = new_chips_dict
 
@@ -95,7 +98,7 @@ def valid_chip_position(chip_index, chip, cell):
     if cell in ['0', 'column 1', 'column 2', 'column 3']:
         chip_in_triangle = utils.is_point_in_triangle(chip['pos'], board_cell_areas[cell]['vertices'])
     if chip_in_cell or chip_in_triangle:
-        for i, chip in enumerate(chips):
+        for i, chip in enumerate(chips[current_player["name"]]):
             if i == chip_index: continue
             if chip["current_cell"] not in ('owner', cell):
                 return False
@@ -112,8 +115,8 @@ def init_chip_positions():
         chip_y = player_grid['y'] + c_1h/2
         chips_initial_positions[str(chip_values[i])] = {'x':chip_x, 'y':chip_y}
 
-def init_chips():
-    
+def init_chips(): 
+    chips[current_player["name"]].clear()
     for value in chip_values:
         amount = players[current_player["name"]][f"{value:03}"]
         for _ in range(amount):
@@ -124,28 +127,35 @@ def init_chips():
             chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
             chip_dict['dragged'] = False
             chip_dict['current_cell'] = 'owner'
-            chips.append(chip_dict)
+            chips[current_player["name"]].append(chip_dict)
+
+def delete_unmoved_chips():
+    # Esborrar les fitxes del jugador actual que no s'han mogut 
+    moved_chips = []
+    for chip in chips[current_player["name"]]:
+        if chip["current_cell"] != 'owner':
+            moved_chips.append(chip)
+    chips[current_player["name"]] = moved_chips.copy()
 
 def any_chip_dragged():
     '''Devuelve True si alguna ficha está siendo arrastrada'''
-    for chip in chips:
+    for chip in chips[current_player["name"]]:
         if chip['dragged']:
             return True
     return False
 
 def release_all_chips():
     '''Dentro del array 'chips', define el valor 'dragged' de todas las fichas como False'''
-    for chip in chips:
+    for chip in chips[current_player["name"]]:
         chip['dragged'] = False
 
 def confirm_bet():
     bet_dict = {}
     units = 0
-    for chip in chips:
-        if chip["current_cell"] != 'owner':
-            bet_dict["bet_on"] = chip["current_cell"]
-            units += chip["value"]
-            players[current_player["name"]][f"{chip["value"]:03}"] -= 1
+    for chip in chips[current_player["name"]]:
+        bet_dict["bet_on"] = chip["current_cell"]
+        units += chip["value"]
+        players[current_player["name"]][f"{chip["value"]:03}"] -= 1
     bet_dict["units"] = units
     current_bets.append(bet_dict)
 

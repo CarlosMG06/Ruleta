@@ -7,9 +7,9 @@ player_names = ["taronja", "blau", "lila"]
 current_player = {"name": "taronja"}
 
 players = {}
-chips = []
+chips = {"taronja": [], "blau": [], "lila": []}
 
-current_mode = {"betting": True, "roulette": False,  "info": False}
+current_mode = {"betting": True, "roulette": False, "moving_chips": False,  "info": False}
 current_bets = []
 
 # Llista de diccionaris: {"result":, "bets":, "credits":}

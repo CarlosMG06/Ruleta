@@ -65,7 +65,7 @@ def app_run():
     gi_button["enabled"] = not current_mode["info"] and spin_counter["n"] > 0
 
     if current_mode["betting"]:
-        for chip in chips:
+        for chip in chips[current_player["name"]]:
             if chip["current_cell"] != 'owner':
                 bet_button["enabled"] = True
                 break
@@ -75,6 +75,7 @@ def app_run():
                 bet_button["pressed"] = True
             elif mouse["released"] and bet_button["pressed"]:
                 bet_button["pressed"] = False
+                delete_unmoved_chips()
                 confirm_bet()
                 player_i = player_names.index(current_player["name"])
                 if player_i < 2:
@@ -91,7 +92,7 @@ def app_run():
         if not any_chip_dragged() and mouse['pressed']:
             # Una fitxa es dibuixa superposada sobre una altra, si la superposada apareix més endavant en la llista.
             # Recorrent la llista al revés, aconseguim que la fitxa seleccionada sigui la que vegem i no la que pugui haver-hi sota.
-            for chip in reversed(chips): 
+            for chip in reversed(chips[current_player["name"]]): 
                 if utils.is_point_in_circle(mouse, chip['pos'], chip['radius']):
                     chip['dragged'] = True
                     drag_offset["x"] = mouse['x'] - chip['pos']['x']
@@ -99,7 +100,7 @@ def app_run():
                     break
         else:
             if mouse["released"]:
-                for i, chip in enumerate(chips):
+                for i, chip in enumerate(chips[current_player["name"]]):
                     if chip['dragged'] == True:
                         for board_cell in board_cell_areas:
                             valid = False
@@ -117,7 +118,7 @@ def app_run():
                             chip['pos']['y'] = chips_initial_positions[str(chip['value'])]['y']
                 release_all_chips()
             else:
-                for chip in chips:
+                for chip in chips[current_player["name"]]:
                     if chip['dragged']:
                         chip['pos']['x'] = mouse['x'] - drag_offset['x']
                         chip['pos']['y'] = mouse['y'] - drag_offset['y']
@@ -150,6 +151,19 @@ def app_run():
             readjust_roulette()
 
         roulette["idle"] = not (any([roulette["about_to_spin"], roulette["spin_canceled"], roulette["spinning"], roulette["readjusting"]]))    
+    elif current_mode["moving_chips"]:
+        moved_chips = True
+        """for name in player_names:
+            for chip in chips[name]:
+                if chip["current_cell"] not in ('owner', 'house'):
+                    moved_chips = False
+                    break
+            if not moved_chips: break"""
+        moved_chips = True # tmp: Saltarse mover las fichas, borrar esta línea cuando esté hecho
+        if not moved_chips:
+            move_chips()
+        else:
+            next_round()
     else:
         gi_close_button["enabled"] = True
         if utils.is_point_in_rect(mouse, gi_close_button) and gi_close_button["enabled"]:
@@ -157,10 +171,10 @@ def app_run():
                 gi_close_button["pressed"] = True
             if mouse["released"] and gi_close_button["pressed"]:
                 gi_close_button["pressed"] = False
-                if current_mode["roulette"] == None:
-                    current_mode["roulette"] = True
-                else:
-                    current_mode["betting"] = True
+                for mode in current_mode.keys():
+                    if current_mode[mode] == None: 
+                        current_mode[mode] = True
+                        break
                 current_mode["info"] = False
                 hide_game_info()
         elif gi_close_button["pressed"]:
@@ -189,10 +203,10 @@ def app_run():
         elif mouse["released"] and gi_button["pressed"]:
             gi_button["pressed"] = False
             show_game_info()
-            if current_mode["roulette"]:
-                current_mode["roulette"] = None
-            else:
-                current_mode["betting"] = None
+            for mode in current_mode.keys():
+                if current_mode[mode] == True: 
+                    current_mode[mode] = None
+                    break
             current_mode["info"] = True
     elif gi_button["pressed"]:
         gi_button["pressed"] = False
@@ -255,10 +269,11 @@ def app_draw():
         center = (chips_positions[chip]['x'], chips_positions[chip]['y'])
         color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
         pygame.draw.circle(screen, color, center, 5)'''
-    
+        
     # Dibuixar fitxes
-    for chip in chips:
-        draw_chip(chip)
+    for name in player_names:
+        for chip in chips[name]:
+            draw_chip(chip)
 
     if game_info_chart["visible"]:
         update_game_info_chart()
