@@ -56,6 +56,7 @@ board_surface = Surface(board_size)
 board_surface.fill(DARK_GREEN)
 
 board_cell_areas = {}
+house_space = {}
 
 chips_initial_positions = {}
 

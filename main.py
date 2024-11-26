@@ -60,6 +60,15 @@ def app_events():
 def app_run():
     delta_time = clock.get_time() / 1000.0
 
+    # Després de passar a una nova ronda, esperar 2 segons abans d'inicialitzar les fitxes
+    if new_round_delay["bool"]:
+        new_round_delay["timer"] += delta_time
+        if new_round_delay["timer"] >= new_round_delay["wait_time"]:
+            init_chips()
+            new_round_delay["timer"] = 0
+            new_round_delay["bool"] = False 
+        return
+
     bet_button["enabled"] = False
     spin_button["enabled"] = False
     gi_button["enabled"] = not current_mode["info"] and spin_counter["n"] > 0

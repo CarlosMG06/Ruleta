@@ -16,3 +16,5 @@ current_bets = []
 # Llista de diccionaris: {"result":, "bets":, "credits":}
 game_info = []
 round_info = {"result": -1, "bets": [], "credits": []}
+
+new_round_delay = {"bool": False, "timer": 0, "wait_time": 2}
