@@ -28,7 +28,7 @@ number_order = [
 # Ruleta
 roulette = {"position": (10,10), "radius": 150,
 "angle_offset": 360/37/2, "spin_speed": 0, "spin_acc": -100,
-"about_to_spin": False, "spin_canceled": False, "spinning": False, "readjusting": False, "idle": True}
+"states": {"about_to_spin": False, "spinning": False, "readjusting": False, "idle": True, "spin_canceled": False}}
 
 roulette_surface = Surface((roulette["radius"]*2 + 40,roulette["radius"]*2))
 roulette_surface.fill(DARK_GREEN)

@@ -122,34 +122,30 @@ def app_run():
                         chip['pos']['x'] = mouse['x'] - drag_offset['x']
                         chip['pos']['y'] = mouse['y'] - drag_offset['y']
     elif current_mode["roulette"]:
-        spin_button["enabled"] = not (any([roulette["spin_canceled"], roulette["spinning"], roulette["readjusting"]]))
-
+        spin_button["enabled"] = not (any([roulette["states"]["spin_canceled"], roulette["states"]["spinning"], roulette["states"]["readjusting"]]))
+        
         if utils.is_point_in_rect(mouse, spin_button) and spin_button["enabled"]:
             if mouse["pressed"]:
                 # La ruleta gira una miqueta com a anticipació per fer efecte
                 roulette["spin_speed"] = -50
-                roulette["about_to_spin"] = True
+                change_roulette_state()
                 spin_button["pressed"] = True
             if mouse["released"] and spin_button["pressed"]:
                 acc = abs(roulette["spin_acc"])
                 angular_displacement = (54 + random.randint(1,37)) * 360/37 #Gira entre 55 i 91 números
                 roulette["spin_speed"] = math.sqrt(angular_displacement*2/acc)*acc #Càlcul MCUA
-                roulette["spinning"] = True
-                roulette["about_to_spin"] = False
+                change_roulette_state()
                 spin_button["pressed"] = False
         elif spin_button["pressed"]:
             # Si el mouse es mou fora del botó abans de deixar anar, la ruleta torna a la seva posició inicial
             roulette["spin_speed"] = math.sqrt((-50)**2 - roulette["spin_speed"]**2) #Càlcul MCUA
-            roulette["spin_canceled"] = True
-            roulette["about_to_spin"] = False
+            change_roulette_state(cancel_spin=True)
             spin_button["pressed"] = False
 
         if roulette["spin_speed"] != 0:
             spin_roulette(delta_time)
-        elif roulette["readjusting"]:
+        elif roulette["states"]["readjusting"]:
             readjust_roulette()
-
-        roulette["idle"] = not (any([roulette["about_to_spin"], roulette["spin_canceled"], roulette["spinning"], roulette["readjusting"]]))    
     elif current_mode["moving_chips"]:
         moved_chips = True
         """for name in player_names:
@@ -210,7 +206,7 @@ def app_draw():
     # Pintar el fons de verd fosc
     screen.fill(DARK_GREEN)
     
-    if roulette["idle"]:
+    if roulette["states"]["idle"]:
         # Actualitzar taula i graella dels jugadors si la ruleta no està girant
         update_board()
         update_player_grid()
@@ -220,7 +216,7 @@ def app_draw():
     else:
         # Actualitzar la ruleta quan està girant
         update_roulette()
-        if roulette["readjusting"]:
+        if roulette["states"]["readjusting"]:
             # Actualitzar número actual després de girar la ruleta
             update_current_number()
 

@@ -21,6 +21,23 @@ def change_mode(to_info = False):
         current_mode[mode] = False
         current_mode[main_modes[new_mode_index]] = True
 
+def change_roulette_state(cancel_spin = False):
+    for key, value in roulette["states"].items():
+        if value: 
+            state = key
+            break
+    if state == "spin_canceled":
+        roulette["states"]["spin_canceled"] = False
+        roulette["states"]["idle"] = True
+    elif cancel_spin:
+        roulette["states"]["about_to_spin"] = False
+        roulette["states"]["spin_canceled"] = True
+    else:
+        main_states = [key for key in roulette["states"].keys() if key != "spin_canceled"]
+        new_state_index = (main_states.index(state)+1) % len(main_states)
+        roulette["states"][state] = False
+        roulette["states"][main_states[new_state_index]] = True
+
 def next_round():
     give_out_prizes()
     for name in player_names:
@@ -40,15 +57,11 @@ def spin_roulette(delta_time):
     if abs(roulette["spin_speed"]) > 0.5:
         roulette["spin_speed"] += sign * roulette["spin_acc"] * delta_time
     else:
-        if roulette["spinning"]:
-            roulette["spinning"] = False 
-            roulette["readjusting"] = True
-        elif roulette["readjusting"]:
-            roulette["readjusting"] = False
+        if roulette["states"]["readjusting"]:
             spin_counter["n"] += 1
             change_mode()
-        elif roulette["spin_canceled"]:
-            roulette["spin_canceled"] = False
+        if not roulette["states"]["about_to_spin"]:
+            change_roulette_state()
         roulette["angle_offset"] %= 360
         roulette["spin_speed"] = 0
     roulette["angle_offset"] += roulette["spin_speed"] * delta_time
