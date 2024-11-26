@@ -78,12 +78,19 @@ def redistribute_player_chips(player_name):
     player_money = total_money_player(player_name)
     new_chips_total = 0
 
-    i = 0
-    while new_chips_total < player_money:
-        for chip_value in chip_values:
-            if player_money >= new_chips_total + chip_value:
-                new_chips_dict[f"{chip_value:03}"] += 1
-                new_chips_total += chip_value
+    def limit_proportion(chip_value):
+        match chip_value:
+            case 100: return 5/9 - 0.001 # apareix a partir de 180 (excluit)
+            case 50: return 5/8 - 0.001  # apareix a partir de 80 (excluit)
+            case 20: return 2/3 - 0.001  # apareix a partir de 30 (excluit)
+            case 10: return 1 - 0.001    # apareix a partir de 10 (excluit)
+            case 5: return 1 # Sense límit
+
+    for chip_value in chip_values:
+        limit = int(limit_proportion(chip_value) * (player_money - new_chips_total) / chip_value)
+        while player_money >= new_chips_total + chip_value and new_chips_dict[f"{chip_value:03}"] < limit:
+            new_chips_dict[f"{chip_value:03}"] += 1
+            new_chips_total += chip_value
 
     players[player_name] = new_chips_dict
 
