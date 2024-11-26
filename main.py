@@ -83,8 +83,7 @@ def app_run():
                     init_chips()
                 else:
                     current_player["name"] = player_names[0]
-                    current_mode["betting"] = False
-                    current_mode["roulette"] = True
+                    change_mode()
         elif bet_button["pressed"]:
             bet_button["pressed"] = False
 
@@ -171,11 +170,7 @@ def app_run():
                 gi_close_button["pressed"] = True
             if mouse["released"] and gi_close_button["pressed"]:
                 gi_close_button["pressed"] = False
-                for mode in current_mode.keys():
-                    if current_mode[mode] == None: 
-                        current_mode[mode] = True
-                        break
-                current_mode["info"] = False
+                change_mode()
                 hide_game_info()
         elif gi_close_button["pressed"]:
             gi_close_button["pressed"] = False
@@ -203,11 +198,7 @@ def app_run():
         elif mouse["released"] and gi_button["pressed"]:
             gi_button["pressed"] = False
             show_game_info()
-            for mode in current_mode.keys():
-                if current_mode[mode] == True: 
-                    current_mode[mode] = None
-                    break
-            current_mode["info"] = True
+            change_mode(to_info=True)
     elif gi_button["pressed"]:
         gi_button["pressed"] = False
      

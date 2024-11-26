@@ -3,13 +3,30 @@ from UI_Data import *
 import math
 import utils
 
+def change_mode(to_info = False):
+    for key, value in current_mode.items():
+        if value == None: mode_none = key
+        if value: 
+            mode = key
+            break
+    if mode == "info":
+        current_mode["info"] = False
+        current_mode[mode_none] = True
+    elif to_info:
+        current_mode[mode] = None
+        current_mode["info"] = True
+    else:
+        main_modes = [key for key in current_mode.keys() if key != "info"]
+        new_mode_index = (main_modes.index(mode)+1) % len(main_modes)
+        current_mode[mode] = False
+        current_mode[main_modes[new_mode_index]] = True
+
 def next_round():
     give_out_prizes()
     for name in player_names:
         redistribute_player_chips(name)
     log_game_info()
-    current_mode["moving_chips"] = False
-    current_mode["betting"] = True
+    change_mode()
     for name in player_names:
         chips[name].clear()
     init_chips()
@@ -29,8 +46,7 @@ def spin_roulette(delta_time):
         elif roulette["readjusting"]:
             roulette["readjusting"] = False
             spin_counter["n"] += 1
-            current_mode["roulette"] = False
-            current_mode["moving_chips"] = True
+            change_mode()
         elif roulette["spin_canceled"]:
             roulette["spin_canceled"] = False
         roulette["angle_offset"] %= 360
