@@ -15,4 +15,4 @@ current_bets = []
 
 # Llista de diccionaris: {"result":, "bets":, "credits":}
 game_info = []
-game_info_keys = ["result", "bets", "credits"]
+round_info = {"result": -1, "bets": [], "credits": []}

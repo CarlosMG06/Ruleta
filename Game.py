@@ -39,10 +39,10 @@ def change_roulette_state(cancel_spin = False):
         roulette["states"][main_states[new_state_index]] = True
 
 def next_round():
+    log_game_info()
     give_out_prizes()
     for name in player_names:
         redistribute_player_chips(name)
-    log_game_info()
     change_mode()
     for name in player_names:
         chips[name].clear()
@@ -57,6 +57,7 @@ def spin_roulette(delta_time):
         if roulette["states"]["readjusting"]:
             spin_counter["n"] += 1
             change_mode()
+            set_chips_destination()
         if not roulette["states"]["about_to_spin"]:
             change_roulette_state()
         roulette["angle_offset"] %= 360
@@ -192,22 +193,33 @@ def confirm_bet():
     bet_dict["units"] = units
     current_bets.append(bet_dict)
 
+def was_bet_correct(player_name):
+    bet_dict = current_bets[player_names.index(player_name)]
+    bet_on = bet_dict["bet_on"]
+    n = current_number["n"]
+    
+    if bet_on.isdigit():
+        return n == bet_on
+    elif "column" in bet_on:
+        column_number = int(bet_on[-1])
+        return n % 3 == column_number
+    else:
+        order_i = number_order.index(n)
+        match bet_on:
+            case "EVEN":  return n % 2 == 0
+            case "ODD":   return n % 2 == 1
+            case "BLACK": return order_i % 2 == 0
+            case "RED":   return order_i % 2 == 1
+
 def give_out_prizes():
     pass
 
 def log_game_info():
-    round_info = {}
-    
-    # tmp
-    if len(current_bets) == 0:
-        current_bets.extend([{"units": 5, "bet_on": "RED"}, {"units": 110, "bet_on": "7"}, {"units": 20, "bet_on": "ODD"}])
-    
-    round_info[game_info_keys[0]] = current_number["n"]
-    round_info[game_info_keys[1]] = current_bets.copy()
-    credits = []
-    for i, name in enumerate(player_names): 
-        credits.append(total_money_player(name))
-    round_info[game_info_keys[2]] = credits
+    round_info = {
+        "result": current_number["n"],
+        "bets": current_bets.copy(),
+        "credits": [total_money_player(name) for name in player_names]
+    }
     game_info.append(round_info)
 
     current_bets.clear()
@@ -224,12 +236,27 @@ def hide_game_info():
 def set_chips_destination():
     '''Declara a qué posición deben ir las fichas, en función del resultado de la apuesta.'''
     # Definir clave 'dest' en chips, que tiene como valor un dict del tipo {'x':int, 'y':int, 'arrived':False}
-    pass
+    def destination(chip, correct_bet):
+        if correct_bet:
+            return chips_initial_positions[str(chip["value"])]
+        else:
+            return board_cell_areas["HOUSE"]["center"]
+    
+    for name in player_names:
+        correct_bet = was_bet_correct(name)
+        for chip in chips[name]:
+            dest_pos = destination(chip, correct_bet)
+            chip["dest"] = {
+                "x": dest_pos["x"],
+                "y": dest_pos["y"],
+                "arrived": False
+            }
+
+def all_chips_arrived():
+    return all(all(chip['dest']['arrived'] for chip in chips[name]) for name in player_names)
 
 def move_chips():
     '''Mueve cada una de las fichas del array 'chips' a la posición que le toca.'''
-    # COMPRUEBO SI ESTÁN TODOS COMO 'True' UTILIZANDO:
-    # all_chips_arrived = all(map(lambda x: x['dest']['arrived'], chips))
     for chip in chips:
         if not chip['dest']['arrived']:
             # Calculamos el ángulo

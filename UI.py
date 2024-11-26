@@ -231,8 +231,8 @@ def update_board():
 
     house_rect[0] += board["x"]
     house_rect[1] += board["y"]
-    board_cell_areas["house"] = {
-        "rect": {"x": house_rect[0], "y": house_rect[1], "width": house_rect[2], "height": house_rect[3]}
+    board_cell_areas["HOUSE"] = {
+        "center": {"x": center_x, "y": center_y}
     }
 
     # Espais de columnes
@@ -366,7 +366,7 @@ def init_game_info_surface():
     p0 = (game_info_chart["x"], header_line_y)
     p1 = (game_info_chart["x"] + game_info_chart["width"], header_line_y)
     draw.line(gi_surface, LIGHT_GRAY, p0, p1, 3)
-    for i, key in enumerate(game_info_keys):
+    for i, key in enumerate(round_info.keys()):
         string = key.capitalize()
         col_text = font_medium.render(string, True, WHITE)
         match i:

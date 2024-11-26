@@ -147,15 +147,7 @@ def app_run():
         elif roulette["states"]["readjusting"]:
             readjust_roulette()
     elif current_mode["moving_chips"]:
-        moved_chips = True
-        """for name in player_names:
-            for chip in chips[name]:
-                if chip["current_cell"] not in ('owner', 'house'):
-                    moved_chips = False
-                    break
-            if not moved_chips: break"""
-        moved_chips = True # tmp: Saltarse mover las fichas, borrar esta línea cuando esté hecho
-        if not moved_chips:
+        if not all_chips_arrived():
             move_chips()
         else:
             next_round()
