@@ -8,6 +8,7 @@ current_player = {"name": "taronja"}
 
 players = {}
 chips = {"taronja": [], "blau": [], "lila": []}
+chip_speed = 2
 
 current_mode = {"betting": True, "roulette": False, "moving_chips": False,  "info": False}
 current_bets = []

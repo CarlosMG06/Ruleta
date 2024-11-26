@@ -48,9 +48,6 @@ def next_round():
         chips[name].clear()
     init_chips()
 
-def move_chips():
-    pass
-
 # Girar la ruleta
 def spin_roulette(delta_time):
     sign = 1 if roulette["spin_speed"] > 0 else -1
@@ -223,3 +220,27 @@ def show_game_info():
 
 def hide_game_info():
     game_info_chart["visible"] = False
+
+def set_chips_destination():
+    '''Declara a qué posición deben ir las fichas, en función del resultado de la apuesta.'''
+    # Definir clave 'dest' en chips, que tiene como valor un dict del tipo {'x':int, 'y':int, 'arrived':False}
+    pass
+
+def move_chips():
+    '''Mueve cada una de las fichas del array 'chips' a la posición que le toca.'''
+    # COMPRUEBO SI ESTÁN TODOS COMO 'True' UTILIZANDO:
+    # all_chips_arrived = all(map(lambda x: x['dest']['arrived'], chips))
+    for chip in chips:
+        if not chip['dest']['arrived']:
+            # Calculamos el ángulo
+            delta_x = chip['pos']['x'] - chip['dest']['x'] 
+            delta_y = chip['pos']['y'] - chip['dest']['y']
+            rad = math.atan(delta_x / delta_y) 
+            # Calculamos la variación de posición en función del ángulo
+            chip['pos']['x'] += math.sin(rad) * chip_speed
+            chip['pos']['y'] += math.sin(rad) * chip_speed
+            # Si la ficha está lo suficientemente cerca del destino, decidimos que ya ha llegado
+            if utils.is_point_in_circle(chip['pos'], chip['dest'], r=5):
+                chip['pos']['x'] = chip['dest']['x'] 
+                chip['pos']['y'] = chip['dest']['y']
+                chip['dest']['arrived'] = True
