@@ -2,6 +2,7 @@ from GameData import *
 from UI_Data import *
 import math
 import utils
+from pygame.time import delay
 
 def change_mode(to_info = False):
     for key, value in current_mode.items():
@@ -44,9 +45,11 @@ def next_round():
     for name in player_names:
         redistribute_player_chips(name)
     change_mode()
+
+    new_round_delay["bool"] = True
+    delay(int(new_round_delay["wait_time"]*1000/2)) # Esperar un segon abans d'esborrar les fitxes
     for name in player_names:
         chips[name].clear()
-    init_chips()
 
 # Girar la ruleta
 def spin_roulette(delta_time):
@@ -127,11 +130,12 @@ def valid_chip_position(chip_index, chip, cell):
     Input:
         -chip(dict): chip dentro de el array chips
         -cell(str): representa la celda del tablero ('0', '27', 'ODD', 'RED', etc.)'''
-    chip_in_cell = utils.is_point_in_rect(chip['pos'], board_cell_areas[cell]['rect'])
+    chip_in_rect = utils.is_point_in_rect(chip['pos'], board_cell_areas[cell]['rect'])
     chip_in_triangle = False
     if cell in ['0', 'column 1', 'column 2', 'column 3']:
         chip_in_triangle = utils.is_point_in_triangle(chip['pos'], board_cell_areas[cell]['vertices'])
-    if chip_in_cell or chip_in_triangle:
+    
+    if chip_in_rect or chip_in_triangle:
         for i, chip in enumerate(chips[current_player["name"]]):
             if i == chip_index: continue
             if chip["current_cell"] not in ('owner', cell):
@@ -240,7 +244,7 @@ def set_chips_destination():
         if correct_bet:
             return chips_initial_positions[str(chip["value"])]
         else:
-            return board_cell_areas["HOUSE"]["center"]
+            return house_space["center"]
     
     for name in player_names:
         correct_bet = was_bet_correct(name)
@@ -257,17 +261,18 @@ def all_chips_arrived():
 
 def move_chips():
     '''Mueve cada una de las fichas del array 'chips' a la posición que le toca.'''
-    for chip in chips:
-        if not chip['dest']['arrived']:
-            # Calculamos el ángulo
-            delta_x = chip['pos']['x'] - chip['dest']['x'] 
-            delta_y = chip['pos']['y'] - chip['dest']['y']
-            rad = math.atan(delta_x / delta_y) 
-            # Calculamos la variación de posición en función del ángulo
-            chip['pos']['x'] += math.sin(rad) * chip_speed
-            chip['pos']['y'] += math.sin(rad) * chip_speed
-            # Si la ficha está lo suficientemente cerca del destino, decidimos que ya ha llegado
-            if utils.is_point_in_circle(chip['pos'], chip['dest'], r=5):
-                chip['pos']['x'] = chip['dest']['x'] 
-                chip['pos']['y'] = chip['dest']['y']
-                chip['dest']['arrived'] = True
+    for name in player_names:
+        for chip in chips[name]:
+            if not chip['dest']['arrived']:
+                # Calculamos el ángulo
+                delta_x = chip['pos']['x'] - chip['dest']['x'] 
+                delta_y = chip['pos']['y'] - chip['dest']['y']
+                rad = math.atan2(delta_y, delta_x) 
+                # Calculamos la variación de posición en función del ángulo
+                chip['pos']['x'] -= math.cos(rad) * chip_speed
+                chip['pos']['y'] -= math.sin(rad) * chip_speed
+                # Si la ficha está lo suficientemente cerca del destino, decidimos que ya ha llegado
+                if utils.is_point_in_circle(chip['pos'], chip['dest'], r=5):
+                    chip['pos']['x'] = chip['dest']['x'] 
+                    chip['pos']['y'] = chip['dest']['y']
+                    chip['dest']['arrived'] = True

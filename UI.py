@@ -229,11 +229,9 @@ def update_board():
     text_house_rect = text_house.get_rect(center=(center_x,center_y))
     board_surface.blit(text_house, text_house_rect)
 
-    house_rect[0] += board["x"]
-    house_rect[1] += board["y"]
-    board_cell_areas["HOUSE"] = {
-        "center": {"x": center_x, "y": center_y}
-    }
+    center_x += board["x"]
+    center_y += board["y"]
+    house_space["center"] = {"x": center_x, "y": center_y}
 
     # Espais de columnes
     x = grid_x + c_w * rows
