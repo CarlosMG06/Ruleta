@@ -9,10 +9,6 @@ import utils
 from UI import *
 from Game import *
 
-mouse = {"x": -1, "y": -1, 
-"pressed": False, "held": False, "released": False}
-drag_offset = {'x': 0, 'y': 0}
-
 pygame.init()
 clock = pygame.time.Clock()
 
@@ -22,10 +18,12 @@ pygame.display.set_caption('Window Title')
 # Bucle de l'aplicació
 def main():
     is_looping = True
-
-    update_roulette()
-    init_grid_surface()
-    init_game_info_surface()
+    
+    init_roulette()
+    init_betting_grid()
+    init_betting_board()
+    init_player_grid()
+    init_game_info_chart()
     init_players()
     init_chip_positions()
     init_chips()
@@ -86,50 +84,11 @@ def app_run():
                 bet_button["pressed"] = False
                 delete_unmoved_chips()
                 confirm_bet()
-                player_i = player_names.index(current_player["name"])
-                if player_i < 2:
-                    current_player["name"] = player_names[player_i+1]
-                    init_chips()
-                else:
-                    current_player["name"] = player_names[0]
-                    change_mode()
+                next_player()                  
         elif bet_button["pressed"]:
             bet_button["pressed"] = False
 
-        # Arrossegar fitxes
-        if not any_chip_dragged() and mouse['pressed']:
-            # Una fitxa es dibuixa superposada sobre una altra, si la superposada apareix més endavant en la llista.
-            # Recorrent la llista al revés, aconseguim que la fitxa seleccionada sigui la que vegem i no la que pugui haver-hi sota.
-            for chip in reversed(chips[current_player["name"]]): 
-                if utils.is_point_in_circle(mouse, chip['pos'], chip['radius']):
-                    chip['dragged'] = True
-                    drag_offset["x"] = mouse['x'] - chip['pos']['x']
-                    drag_offset["y"] = mouse['y'] - chip['pos']['y']
-                    break
-        else:
-            if mouse["released"]:
-                for i, chip in enumerate(chips[current_player["name"]]):
-                    if chip['dragged'] == True:
-                        for board_cell in board_cell_areas:
-                            valid = False
-                            if valid_chip_position(i, chip, board_cell):
-                                valid = True
-                                chip["current_cell"] = board_cell
-                                '''print(f'Posición válida!')
-                                print(f'Nombre casilla: {board_cell}')
-                                print(f'Contenido de su diccionario: {board_cell_areas[board_cell]}')'''
-                                break
-                        if not valid:
-                            '''print(f'Posición NO válida! Devolviendo ficha a la posición base...')'''
-                            chip["current_cell"] = 'owner'
-                            chip['pos']['x'] = chips_initial_positions[str(chip['value'])]['x']
-                            chip['pos']['y'] = chips_initial_positions[str(chip['value'])]['y']
-                release_all_chips()
-            else:
-                for chip in chips[current_player["name"]]:
-                    if chip['dragged']:
-                        chip['pos']['x'] = mouse['x'] - drag_offset['x']
-                        chip['pos']['y'] = mouse['y'] - drag_offset['y']
+        drag_chips()
     elif current_mode["roulette"]:
         spin_button["enabled"] = not (any([roulette["states"]["spin_canceled"], roulette["states"]["spinning"], roulette["states"]["readjusting"]]))
         
@@ -173,21 +132,7 @@ def app_run():
             gi_close_button["pressed"] = False
 
         if gi_scroll["visible"]:
-            circle_center = {
-                "x": int(gi_scroll["x"] + gi_scroll["width"] / 2),
-                "y": int(gi_scroll["y"] + (gi_scroll["percentage"] / 100) * gi_scroll["height"])
-            }
-            if mouse["pressed"] and not gi_scroll["dragging"] and utils.is_point_in_circle(mouse, circle_center, gi_scroll["radius"]):
-                gi_scroll["dragging"] = True
-
-            if gi_scroll["dragging"]:
-                relative_y = max(min(mouse["y"], gi_scroll["y"] + gi_scroll["height"]), gi_scroll["y"])
-                gi_scroll["percentage"] = ((relative_y - gi_scroll["y"]) / gi_scroll["height"]) * 100
-
-            if mouse["released"]:
-                gi_scroll["dragging"] = False
-
-            gi_scroll["surface_offset"] = int((gi_scroll["percentage"] / 100) * (48 * len(game_info) - gi_scroll["visible_height"]))
+            drag_scroll()
 
     if utils.is_point_in_rect(mouse, gi_button) and gi_button["enabled"]:
         if mouse["pressed"]:
@@ -209,7 +154,6 @@ def app_draw():
     
     if roulette["states"]["idle"]:
         # Actualitzar taula i graella dels jugadors si la ruleta no està girant
-        update_board()
         update_player_grid()
         if spin_counter["n"] > 0:
             # Dibuixar el número actual si la ruleta no està girant i s'ha girat una vegada com a mínim
@@ -248,7 +192,7 @@ def app_draw():
         color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
         rect_values = (board_cell_areas[board_cell]['rect']['x'], board_cell_areas[board_cell]['rect']['y'], board_cell_areas[board_cell]['rect']['width'], board_cell_areas[board_cell]['rect']['height'])
         pygame.draw.rect(screen, color, rect_values, 3)
-        if board_cell in ("0", "col1", "col2", "col3"):
+        if board_cell in ("0", "column 1", "column 2", "column 3"):
             pygame.draw.polygon(screen, color, board_cell_areas[board_cell]['vertices'], 3)
     """
 

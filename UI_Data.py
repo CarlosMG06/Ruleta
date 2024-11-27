@@ -59,6 +59,7 @@ board_cell_areas = {}
 house_space = {}
 
 chips_initial_positions = {}
+drag_offset = {'x': 0, 'y': 0}
 
 # Botó de confirmar aposta
 bet_button = {
@@ -89,7 +90,7 @@ game_info_chart = {
     "x": gi_window["x"] + 20, 
     "y": gi_window["y"] + 60,
     "width": gi_window["width"] - 80,
-    "height": gi_window["height"] - 70,
+    "height": gi_window["height"] - 72,
     "visible": False
 }
 
@@ -109,5 +110,5 @@ gi_scroll = {"x": gi_window["x"] + gi_window["width"] - 20,
              "y": gi_window["y"] + 55, 
              "width": 5, "height": 250, 
              "radius": 10, "percentage": 0, "dragging": False,
-             "surface_offset": 0, "visible_height": game_info_chart["height"],
+             "surface_offset": 0, "visible_height": game_info_chart["height"], "total_height": -1,
              "visible": False}

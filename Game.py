@@ -5,6 +5,7 @@ import utils
 from pygame.time import delay
 
 def change_mode(to_info = False):
+    """Canvia el mode del joc."""
     for key, value in current_mode.items():
         if value == None: mode_none = key
         if value: 
@@ -23,6 +24,7 @@ def change_mode(to_info = False):
         current_mode[main_modes[new_mode_index]] = True
 
 def change_roulette_state(cancel_spin = False):
+    """Canvia l'estat de la ruleta."""
     for key, value in roulette["states"].items():
         if value: 
             state = key
@@ -40,8 +42,9 @@ def change_roulette_state(cancel_spin = False):
         roulette["states"][main_states[new_state_index]] = True
 
 def next_round():
+    """Passa a la següent ronda."""
     hand_out_prizes()
-    log_game_info()
+    log_round_info()
     for name in player_names:
         redistribute_player_chips(name)
     change_mode()
@@ -51,8 +54,8 @@ def next_round():
     for name in player_names:
         chips[name].clear()
 
-# Girar la ruleta
 def spin_roulette(delta_time):
+    """Gira la ruleta."""
     sign = 1 if roulette["spin_speed"] > 0 else -1
     if abs(roulette["spin_speed"]) > 0.5:
         roulette["spin_speed"] += sign * roulette["spin_acc"] * delta_time
@@ -67,8 +70,8 @@ def spin_roulette(delta_time):
         roulette["spin_speed"] = 0
     roulette["angle_offset"] += roulette["spin_speed"] * delta_time
 
-# Ajustar la ruleta després de girar per tornar a alinear la casella amb la fletxa
 def readjust_roulette():
+    """Reajusta la ruleta després de girar per tornar a alinear la casella amb la fletxa"""
     adjustment = (roulette["angle_offset"] - 360/37/2) % (360/37)
     if adjustment >= 360/37/2:
         adjustment -= 360/37
@@ -82,7 +85,7 @@ def readjust_roulette():
         roulette["spin_speed"] = 0.1
 
 def init_players():
-    '''Inicia el diccionario que contiene información de los jugadores.'''
+    """Inicialitza el diccionari que conté informació dels jugadors."""
     starting_chips = list(zip(chip_values, (0,1,1,2,2))) # Las tuplas son: (NomFicha, Cantidad
     for name in player_names:
         starting_chips_dict = {}
@@ -94,14 +97,14 @@ def init_players():
         players[name]["credit"] = total_credit_player(name)
 
 def total_credit_player(player_name):
-    '''Devuelve el dinero total que tiene el jugador, a partir de sus fichas'''
+    """Retorna el crèdit total que té el jugador, a partir de les seves fitxes."""
     total_credit = 0
     for chip_value, chip_amount in players[player_name]["chips"].items():
         total_credit += int(chip_value) * chip_amount
     return total_credit
 
 def redistribute_player_chips(player_name):
-    '''Redistribuye las fichas que tiene un jugador para asegurar que tiene la mayor variedad de fichas posibles'''
+    """Redistribueix les fitxes que té un jugador per assegurar que té la major varietat de fitxes possibles."""
     global players
     new_chips_dict = {'100': 0, '050': 0, '020': 0, '010': 0, '005': 0}
     player_credit = players[player_name]["credit"]
@@ -123,28 +126,19 @@ def redistribute_player_chips(player_name):
 
     players[player_name]["chips"] = new_chips_dict
 
-def valid_chip_position(chip_index, chip, cell):
-    '''Comprueba que la ficha puesta en el tablero de apuestas está en posición válida (True, False).
-    
-    Input:
-        -chip(dict): chip dentro de el array chips
-        -cell(str): representa la celda del tablero ('0', '27', 'ODD', 'RED', etc.)'''
+def valid_chip_position(chip, cell):
+    '''Comprova que la fitxa posada en la taula d'apostes està en una posició vàlida.'''
     chip_in_rect = utils.is_point_in_rect(chip['pos'], board_cell_areas[cell]['rect'])
     chip_in_triangle = False
     if cell in ['0', 'column 1', 'column 2', 'column 3']:
         chip_in_triangle = utils.is_point_in_triangle(chip['pos'], board_cell_areas[cell]['vertices'])
     
     if chip_in_rect or chip_in_triangle:
-        for i, chip in enumerate(chips[current_player["name"]]):
-            if i == chip_index: continue
-            if chip["current_cell"] not in ('owner', cell):
-                return False
-        '''print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')'''
         return True
-    '''print(f'Valores de valid_chip_position() --> chip_in_cell={chip_in_cell}, chip_in_triangle={chip_in_triangle}')'''
     return False
 
 def init_chip_positions():
+    """Inicialitza les posicions inicials de les fitxes segons el seu valor."""
     c_w = player_grid["cell"]["width"]
     c_1w, c_1h = player_grid["cell"]["1st_w"], player_grid["cell"]["1st_h"]
     for i in range(len(chip_values)):
@@ -152,7 +146,8 @@ def init_chip_positions():
         chip_y = player_grid['y'] + c_1h/2
         chips_initial_positions[str(chip_values[i])] = {'x':chip_x, 'y':chip_y}
 
-def init_chips(): 
+def init_chips():
+    """Inicialitza les fitxes del jugador actual."""
     chips[current_player["name"]].clear()
     for value in chip_values:
         amount = players[current_player["name"]]["chips"][f"{value:03}"]
@@ -161,13 +156,13 @@ def init_chips():
             chip_dict['value'] = value
             chip_dict['owner'] = current_player["name"]
             chip_dict['pos'] = {'x': chips_initial_positions[str(value)]['x'], 'y': chips_initial_positions[str(value)]['y']}
-            chip_dict['radius'] = 6 + int(math.log2(chip_dict['value'])*3)
+            chip_dict['radius'] = 8 + int(math.log2(value)*2)
             chip_dict['dragged'] = False
             chip_dict['current_cell'] = 'owner'
             chips[current_player["name"]].append(chip_dict)
 
 def delete_unmoved_chips():
-    # Esborrar les fitxes del jugador actual que no s'han mogut 
+    """Esborra les fitxes del jugador actual que no s'han mogut."""
     moved_chips = []
     for chip in chips[current_player["name"]]:
         if chip["current_cell"] != 'owner':
@@ -175,39 +170,114 @@ def delete_unmoved_chips():
     chips[current_player["name"]] = moved_chips.copy()
 
 def any_chip_dragged():
-    '''Devuelve True si alguna ficha está siendo arrastrada'''
+    '''Retorna True si qualsevol fitxa s'està arrossegant.'''
     for chip in chips[current_player["name"]]:
         if chip['dragged']:
             return True
     return False
 
+def drag_scroll():
+    """Controla l'arrossegament del scroll, actualitzant el offset de la superfície."""
+    circle_center = {
+        "x": int(gi_scroll["x"] + gi_scroll["width"] / 2),
+        "y": int(gi_scroll["y"] + (gi_scroll["percentage"] / 100) * gi_scroll["height"])
+    }
+    if mouse["pressed"] and not gi_scroll["dragging"] and utils.is_point_in_circle(mouse, circle_center, gi_scroll["radius"]):
+        gi_scroll["dragging"] = True
+
+    if gi_scroll["dragging"]:
+        relative_y = max(min(mouse["y"], gi_scroll["y"] + gi_scroll["height"]), gi_scroll["y"])
+        gi_scroll["percentage"] = ((relative_y - gi_scroll["y"]) / gi_scroll["height"]) * 100
+
+    if mouse["released"]:
+        gi_scroll["dragging"] = False
+    
+    gi_scroll["surface_offset"] = int((gi_scroll["percentage"] / 100) * (gi_scroll["total_height"] - gi_scroll["visible_height"]))
+
+def drag_chips():
+    """Controla l'arrossegament de les fitxes, actualitzant els seus diccionaris."""
+    if not any_chip_dragged() and mouse['pressed']:
+        # Una fitxa es dibuixa superposada sobre una altra, si la superposada apareix més endavant en la llista.
+        # Recorrent la llista al revés, aconseguim que la fitxa seleccionada sigui la que vegem i no la que pugui haver-hi sota.
+        for chip in reversed(chips[current_player["name"]]): 
+            if utils.is_point_in_circle(mouse, chip['pos'], chip['radius']):
+                chip['dragged'] = True
+                drag_offset["x"] = mouse['x'] - chip['pos']['x']
+                drag_offset["y"] = mouse['y'] - chip['pos']['y']
+                break
+    else:
+        if mouse["released"]:
+            for chip in chips[current_player["name"]]:
+                if chip['dragged'] == True:
+                    for board_cell in board_cell_areas:
+                        valid = False
+                        if valid_chip_position(chip, board_cell):
+                            # Posició vàlida
+                            valid = True
+                            chip["current_cell"] = board_cell
+                            break
+                    if not valid:
+                        # Posició invàlida. Es retorna a la posició inicial.
+                        chip["current_cell"] = 'owner'
+                        chip['pos']['x'] = chips_initial_positions[str(chip['value'])]['x']
+                        chip['pos']['y'] = chips_initial_positions[str(chip['value'])]['y']
+            release_all_chips()
+        else:
+            for chip in chips[current_player["name"]]:
+                if chip['dragged']:
+                    chip['pos']['x'] = mouse['x'] - drag_offset['x']
+                    chip['pos']['y'] = mouse['y'] - drag_offset['y']
+
 def release_all_chips():
-    '''Dentro del array 'chips', define el valor 'dragged' de todas las fichas como False'''
+    """Canvia el valor "dragged" de totes les fitxes a False."""
     for chip in chips[current_player["name"]]:
         chip['dragged'] = False
 
 def confirm_bet():
-    bet_dict = {}
-    units = 0
+    """Confirma el conjunt d'apostes del jugador actual i guarda la llista."""
     cur_p_name = current_player["name"]
+    
+    bet_dict = {}
     for chip in chips[cur_p_name]:
-        bet_dict["bet_on"] = chip["current_cell"]
-        units += chip["value"]
-        players[cur_p_name]["chips"][f"{chip["value"]:03}"] -= 1
+        current_cell = chip["current_cell"]
+        bet_dict[current_cell] = bet_dict.get(current_cell, 0) + chip["value"]
+        players[cur_p_name]["chips"][f"{chip['value']:03}"] -= 1
+    
+    bet_list = [{"bet_on": cell, "units": units} for cell, units in bet_dict.items()]
+    
     players[cur_p_name]["credit"] = total_credit_player(cur_p_name)
-    bet_dict["units"] = units
-    current_bets[cur_p_name] = bet_dict
+    current_bets[cur_p_name] = bet_list
 
-def was_bet_correct(player_name):
-    bet_dict = current_bets[player_name]
+def next_player():
+    """Passa el torn al següent jugador amb crèdit. 
+    Si n'és el primer jugador, canvia de mode. En cas contrari, inicialitza les seves fitxes."""
+    next_player_i = current_player["index"]
+    while True:
+        next_player_i += 1
+        next_player_i %= len(player_names)
+        
+        current_player["index"] = next_player_i
+        current_player["name"] = player_names[next_player_i]
+        
+        if current_player["index"] == 0:
+            change_mode()
+            break
+        elif players[current_player["name"]]["credit"] > 0:
+            init_chips()
+            break
+
+def was_bet_correct(bet_dict):
+    """Determina si una aposta ha sigut acertada o no."""
     bet_on = bet_dict["bet_on"]
     n = current_number["n"]
     
     if bet_on.isdigit():
         return n == bet_on
+    elif n == 0:
+        return False
     elif "column" in bet_on:
         column_number = int(bet_on[-1])
-        return n % 3 == column_number
+        return n % 3 == column_number % 3
     else:
         order_i = number_order.index(n)
         match bet_on:
@@ -217,22 +287,25 @@ def was_bet_correct(player_name):
             case "RED":   return order_i % 2 == 1
 
 def hand_out_prizes():
-    for i, (player_name, bet_dict) in enumerate(current_bets.items()): 
-        if was_bet_correct(player_name):
-            bet_units = bet_dict["units"]
-            prize = bet_units # Retornar les unitats apostades
+    """Atorga premis per les apostes acertades de cada jugador."""
+    for player_name, bet_list in current_bets.items():
+        for bet_dict in bet_list:
+            if was_bet_correct(bet_dict):
+                bet_units = bet_dict["units"]
+                prize = bet_units # Retornar les unitats apostades
 
-            bet_on = bet_dict["bet_on"]
-            if bet_on.isdigit():
-                prize += bet_units * 35
-            elif "column" in bet_on:
-                prize += bet_units * 2
-            else:
-                prize += bet_units
-            
-            players[player_name]["credit"] += prize
+                bet_on = bet_dict["bet_on"]
+                if bet_on.isdigit():
+                    prize += bet_units * 35
+                elif "column" in bet_on:
+                    prize += bet_units * 2
+                else:
+                    prize += bet_units
+                
+                players[player_name]["credit"] += prize
 
-def log_game_info():
+def log_round_info():
+    """Registra l'informació de la ronda actual."""
     round_info = {
         "result": current_number["n"],
         "bets": current_bets.copy(),
@@ -242,17 +315,8 @@ def log_game_info():
 
     current_bets.clear()
 
-def show_game_info():
-    game_info_chart["visible"] = True
-    if len(game_info) > 6:
-       gi_scroll["visible"] = True
-       gi_scroll["percentage"] = 0
-
-def hide_game_info():
-    game_info_chart["visible"] = False
-
 def set_chips_destination():
-    '''Declara a qué posición deben ir las fichas, en función del resultado de la apuesta.'''
+    """Declara a quina posició han d'anar les fitxes, en funció del resultat de l'aposta."""
     # Definir clave 'dest' en chips, que tiene como valor un dict del tipo {'x':int, 'y':int, 'arrived':False}
     def destination(chip, correct_bet):
         if correct_bet:
@@ -260,21 +324,24 @@ def set_chips_destination():
         else:
             return house_space["center"]
     
-    for name in player_names:
-        correct_bet = was_bet_correct(name)
-        for chip in chips[name]:
-            dest_pos = destination(chip, correct_bet)
-            chip["dest"] = {
-                "x": dest_pos["x"],
-                "y": dest_pos["y"],
-                "arrived": False
-            }
+    for player_name, bet_list in current_bets.items():
+        for bet_dict in bet_list:
+            correct_bet = was_bet_correct(bet_dict)
+            for chip in chips[player_name]:
+                if chip["current_cell"] == bet_dict["bet_on"]:
+                    dest_pos = destination(chip, correct_bet)
+                    chip["dest"] = {
+                        "x": dest_pos["x"],
+                        "y": dest_pos["y"],
+                        "arrived": False
+                    }
 
 def all_chips_arrived():
+    """Retorna True si totes les fitxes han arribat a on han d'anar."""
     return all(all(chip['dest']['arrived'] for chip in chips[name]) for name in player_names)
 
 def move_chips():
-    '''Mueve cada una de las fichas del array 'chips' a la posición que le toca.'''
+    """Mou cadascuna de les fitxes cap a on li toca."""
     chip_speed = 2
     for name in player_names:
         for chip in chips[name]:
