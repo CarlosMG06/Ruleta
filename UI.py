@@ -235,7 +235,8 @@ def init_betting_board():
         }
 
 def init_player_grid():
-    """Inicialitza la primera col·lumna i la primera fila de la graella dels jugadors."""
+    """Inicialitza la primera col·lumna i la primera fila de la graella dels jugadors
+    i dibuixa les quantitats de fitxes un cop."""
     # Abreujar noms
     cols, rows = player_grid["columns"], player_grid["rows"]
     c_w, c_h = player_grid["cell"]["width"], player_grid["cell"]["height"]
@@ -269,6 +270,8 @@ def init_player_grid():
                 color = get_player_color(name)
                 render_centered_text(player_grid_surface, font_small, name, 
                                      (center_x, center_y), color, DARK_GREEN)
+    
+    update_player_grid()
 
 def update_player_grid():
     """Actualitza les quantitats de fitxes de la graella dels jugadors."""
@@ -434,14 +437,15 @@ def get_button_colors(button):
     else:
         return BLACK, LIGHT_GRAY, WHITE
 
-def draw_button(button, spin_button=False, close_button=False):
+def draw_button(button, spin_button=False, close_button=False, gi_button=False):
     """Dibuixa un botó segons el seu estat fent servir el seu diccionari."""
     b_rect_tuple = (button["x"], button["y"], button["width"], button["height"])
     fill_color, border_color, text_color = get_button_colors(button)
 
-    draw.rect(screen, fill_color, b_rect_tuple)
+    surface = game_over_screen if gi_button and current_mode["game_over"] else screen
+    draw.rect(surface, fill_color, b_rect_tuple)
     width = button["height"]//15
-    draw.rect(screen, border_color, b_rect_tuple, width)
+    draw.rect(surface, border_color, b_rect_tuple, width)
     
     if close_button:
         # Icona de tancar
@@ -449,13 +453,33 @@ def draw_button(button, spin_button=False, close_button=False):
         p1 = (button["x"] + button["width"] - 6, button["y"] + button["height"] - 5)
         p2 = (p0[0], p1[1])
         p3 = (p1[0], p0[1])
-        draw.line(screen, text_color, p0, p1, 4)
-        draw.line(screen, text_color, p2, p3, 4)
+        draw.line(surface, text_color, p0, p1, 4)
+        draw.line(surface, text_color, p2, p3, 4)
     else:
         # Text
         b_font = font_big if spin_button else font_medium
         center = (button["x"] + button["width"]/2, button["y"] + button["height"]/2)
-        render_centered_text(screen, b_font, button["string"], center, text_color)
+        render_centered_text(surface, b_font, button["string"], center, text_color)
+
+# Mode 'game_over'
+
+def init_game_over_screen():
+    """Inicialitza la pantalla del final de la partida."""
+    # Finestra
+    window_tuple = (game_over_window["x"], game_over_window["y"], game_over_window["width"], game_over_window["height"])
+    draw.rect(game_over_screen, DARK_GRAY, window_tuple)
+    draw.rect(game_over_screen, WHITE, window_tuple, 3)
+
+    # Text
+    font_1 = font_huge
+    center_x = game_over_window["x"] + game_over_window["width"]/2
+    center_y = game_over_window["y"] + game_over_window["margin"]["y"] + font_1.get_linesize()/2
+    render_centered_text(game_over_screen, font_1, "GAME OVER",
+                         (center_x, center_y), DARK_RED)
+    font_2 = font_serif
+    center_y += font_1.get_linesize()/2 + 3 + font_2.get_linesize()/2
+    render_centered_text(game_over_screen, font_2, "The house wins.",
+                         (center_x, center_y), WHITE)
 
 # Funcions auxiliars generals
 

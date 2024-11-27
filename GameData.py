@@ -15,7 +15,7 @@ chips = {"taronja": [], "blau": [], "lila": []}
 
 current_player = {"name": player_names[0], "index": 0}
 current_bets = {}
-current_mode = {"betting": True, "roulette": False, "moving_chips": False,  "info": False}
+current_mode = {"betting": True, "roulette": False, "moving_chips": False, "game_over": False, "info": False}
 
 # Mode 'roulette'
 

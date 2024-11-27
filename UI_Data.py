@@ -13,6 +13,7 @@ GRAY = (128, 128, 128)
 DARK_GRAY = (51, 51, 51)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+DARK_RED = (128, 0, 32)
 GREEN = (0, 255, 0)
 DARK_GREEN = (0, 85, 17)
 GOLD = (255, 153, 0)
@@ -84,6 +85,13 @@ pg_height = player_grid["cell"]["1st_h"] + player_grid["cell"]["height"] * (play
 pg_size = (pg_width, pg_height)
 player_grid_surface = Surface(pg_size)
 player_grid_surface.fill(DARK_GREEN)
+
+# Mode 'game_over'
+
+game_over_screen = Surface((800, 450), SRCALPHA)
+game_over_screen.fill(BLACK_ALPHA)
+
+game_over_window = {"x": 240, "y": 135, "width": 320, "height": 180}
 
 # Mode 'info'
 

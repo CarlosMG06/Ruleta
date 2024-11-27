@@ -149,7 +149,7 @@ def next_player():
             init_chips()
             break
 
-def change_mode(to_info = False):
+def change_mode(to_info = False, to_game_over = False):
     """Canvia el mode del joc."""
     for key, value in current_mode.items():
         if value == None: mode_none = key
@@ -162,8 +162,11 @@ def change_mode(to_info = False):
     elif to_info:
         current_mode[mode] = None
         current_mode["info"] = True
+    elif to_game_over:
+        current_mode[mode] = False
+        current_mode["game_over"] = True
     else:
-        main_modes = [key for key in current_mode.keys() if key != "info"]
+        main_modes = [key for key in current_mode.keys() if key not in ("info", "game_over")]
         new_mode_index = (main_modes.index(mode)+1) % len(main_modes)
         current_mode[mode] = False
         current_mode[main_modes[new_mode_index]] = True
@@ -226,7 +229,7 @@ def was_bet_correct(bet_dict):
     n = current_number["n"]
     
     if bet_on.isdigit():
-        return n == bet_on
+        return n == int(bet_on)
     elif n == 0:
         return False
     elif "column" in bet_on:
@@ -292,12 +295,16 @@ def next_round():
     for name in player_names:
         redistribute_player_chips(name)
     log_round_info()
-    change_mode()
-
-    new_round_delay["bool"] = True
+    
     delay(int(new_round_delay["wait_time"]*1000/2)) # Esperar un segon abans d'esborrar les fitxes
     for name in player_names:
         chips[name].clear()
+
+    if all(players[name]["credit"] == 0 for name in player_names):
+        game_over()
+    else:
+        change_mode()
+        new_round_delay["bool"] = True
 
 def hand_out_prizes():
     """Atorga premis per les apostes acertades de cada jugador."""
@@ -370,3 +377,13 @@ def drag_scroll():
         gi_scroll["dragging"] = False
     
     gi_scroll["surface_offset"] = int((gi_scroll["percentage"] / 100) * (gi_scroll["total_height"] - gi_scroll["visible_height"]))
+
+# Mode 'game_over'
+
+def game_over():
+    change_mode(to_game_over=True)
+    margin_x = (game_over_window["width"] - gi_button["width"])/2
+    gi_button["x"] = game_over_window["x"] + margin_x
+    margin_y = margin_x/4
+    gi_button["y"] = game_over_window["y"] + game_over_window["height"] - gi_button["height"] - margin_y
+    game_over_window["margin"] = {"x": margin_x, "y": margin_y}

@@ -6,8 +6,8 @@ import pygame
 import sys
 import utils
 
-from UI import *
 from Game import *
+from UI import *
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -16,14 +16,15 @@ clock = pygame.time.Clock()
 def main():
     is_looping = True
     
+    init_players()
+    init_chip_positions()
+    init_chips()
+
     init_roulette()
     init_betting_grid()
     init_betting_board()
     init_player_grid()
     init_game_info_chart()
-    init_players()
-    init_chip_positions()
-    init_chips()
 
     while is_looping:
         is_looping = app_events()
@@ -81,6 +82,7 @@ def app_run():
                 bet_button["pressed"] = False
                 delete_unmoved_chips()
                 confirm_bet()
+                update_player_grid()
                 next_player()                  
         elif bet_button["pressed"]:
             bet_button["pressed"] = False
@@ -116,7 +118,9 @@ def app_run():
             move_chips_towards_destination()
         else:
             next_round()
-    else:
+            if current_mode["game_over"]:
+                init_game_over_screen()
+    elif current_mode["info"]:
         gi_close_button["enabled"] = True
         if utils.is_point_in_rect(mouse, gi_close_button) and gi_close_button["enabled"]:
             if mouse["pressed"]:
@@ -150,8 +154,6 @@ def app_draw():
     screen.fill(DARK_GREEN)
     
     if roulette["states"]["idle"]:
-        # Actualitzar taula i graella dels jugadors si la ruleta no està girant
-        update_player_grid()
         if spin_counter["n"] > 0:
             # Dibuixar el número actual si la ruleta no està girant i s'ha girat una vegada com a mínim
             draw_current_number()
@@ -169,7 +171,7 @@ def app_draw():
     draw_button(spin_button, spin_button=True)
     
     # Dibuixar botó d'informació de la partida
-    draw_button(gi_button)
+    draw_button(gi_button, gi_button=True)
 
     # Línia de separació
     pygame.draw.line(screen, LIGHT_GRAY, (340, 0), (340, 450), 2)
@@ -210,6 +212,9 @@ def app_draw():
         if gi_scroll["visible"]:
             draw_scroll()
         draw_button(gi_close_button, close_button=True)
+    
+    if current_mode["game_over"]:
+        screen.blit(game_over_screen, (0,0))
 
     # Actualitzar el dibuix a la finestra
     pygame.display.update()
