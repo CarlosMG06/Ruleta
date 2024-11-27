@@ -32,13 +32,15 @@ def init_chips():
     for value in chip_values:
         amount = players[current_player["name"]]["chips"][f"{value:03}"]
         for _ in range(amount):
-            chip_dict = {}
-            chip_dict['value'] = value
-            chip_dict['owner'] = current_player["name"]
-            chip_dict['pos'] = {'x': chips_initial_positions[str(value)]['x'], 'y': chips_initial_positions[str(value)]['y']}
-            chip_dict['radius'] = 8 + int(math.log2(value)*2)
-            chip_dict['dragged'] = False
-            chip_dict['current_cell'] = 'owner'
+            chip_dict = {
+                "value": value,
+                "owner": current_player["name"],
+                "pos": {'x': chips_initial_positions[str(value)]['x'],
+                        'y': chips_initial_positions[str(value)]['y']},
+                "radius": 8 + int(math.log2(value)*2),
+                "dragged": False,
+                "current_cell": 'owner'
+            }
             chips[current_player["name"]].append(chip_dict)
 
 def init_chip_positions():
@@ -134,20 +136,19 @@ def confirm_bet():
 
 def next_player():
     """Passa el torn al següent jugador amb crèdit. 
-    Si n'és el primer jugador, canvia de mode. En cas contrari, inicialitza les seves fitxes."""
-    next_player_i = current_player["index"]
+    Si en alguna iteració ha comprovat el primer jugador, canvia de mode. En cas contrari, inicialitza les fitxes del jugador amb crèdit nou."""
+    changed_mode = False
     while True:
-        next_player_i += 1
-        next_player_i %= len(player_names)
-        
-        current_player["index"] = next_player_i
-        current_player["name"] = player_names[next_player_i]
+        current_player["index"] += 1
+        current_player["index"] %= len(player_names)
+        current_player["name"] = player_names[current_player["index"]]
         
         if current_player["index"] == 0:
             change_mode()
-            break
-        elif players[current_player["name"]]["credit"] > 0:
-            init_chips()
+            changed_mode = True
+        if players[current_player["name"]]["credit"] > 0:
+            if not changed_mode:
+                init_chips()
             break
 
 def change_mode(to_info = False, to_game_over = False):
