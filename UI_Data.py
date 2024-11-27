@@ -14,6 +14,7 @@ DARK_GRAY = (51, 51, 51)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 DARK_RED = (128, 0, 32)
+LIGHT_RED = (255, 80, 64)
 GREEN = (0, 255, 0)
 DARK_GREEN = (0, 85, 17)
 GOLD = (255, 153, 0)
@@ -91,7 +92,7 @@ player_grid_surface.fill(DARK_GREEN)
 game_over_screen = Surface((800, 450), SRCALPHA)
 game_over_screen.fill(BLACK_ALPHA)
 
-game_over_window = {"x": 240, "y": 135, "width": 320, "height": 180}
+game_over_window = {"x": 240, "y": 135, "width": 320, "height": 180, "margin": {"x": -1, "y": -1}}
 
 # Mode 'info'
 

@@ -237,11 +237,44 @@ def init_betting_board():
 def init_player_grid():
     """Inicialitza la primera col·lumna i la primera fila de la graella dels jugadors
     i dibuixa les quantitats de fitxes un cop."""
+
     # Abreujar noms
     cols, rows = player_grid["columns"], player_grid["rows"]
     c_w, c_h = player_grid["cell"]["width"], player_grid["cell"]["height"]
     c_1w, c_1h = player_grid["cell"]["1st_w"], player_grid["cell"]["1st_h"]
 
+    # Noms dels jugadors i siluetes de fitxes
+    for row in range(rows):
+        center_y = c_1h / 2 if row == 0 else c_1h + c_h * (row - 0.5)
+        name = player_names[row - 1]
+        for col in range(cols):
+            center_x = c_1w / 2 if col == 0 else c_1w + c_w * (col - 0.5)
+    
+            # Primera cel·la: buida
+            if row == 0 and col == 0:
+                continue
+            
+            # Primera fila: siluetes de fitxes
+            elif row == 0:
+                chip_dict = {
+                    "value": chip_values[col-1],
+                    "pos": {"x": center_x, "y": center_y},
+                    "radius": 8 + int(math.log2(chip_values[col-1])*2)
+                }
+                draw_chip(chip_dict, silhouette=True)
+
+            # Primera columna: noms dels jugadors
+            elif col == 0:
+                color = get_player_color(name)
+                
+                if players[name]["creditless"]:
+                    x = 0
+                    y = center_y - c_h * 0.5
+                    draw.rect(player_grid_surface, DARK_RED, [x, y, c_1w, c_h])
+                
+                render_centered_text(player_grid_surface, font_small, name, 
+                                     (center_x, center_y), color)
+    
     # Línies internes
     for col in range(1, cols):
         x = c_1w + c_w * (col - 1)
@@ -249,27 +282,6 @@ def init_player_grid():
     for row in range(1, rows):
         y = c_1h + c_h * (row - 1)
         draw.line(player_grid_surface, LIGHT_GRAY, (0, y), (pg_size[0], y), 3)
-
-    # Noms dels jugadors i espais de fitxes
-    for row in range(rows):
-        center_y = c_1h / 2 if row == 0 else c_1h + c_h * (row - 0.5)
-        for col in range(cols):
-            center_x = c_1w / 2 if col == 0 else c_1w + c_w * (col - 0.5)
-
-            # Primera cel·la: buida
-            if row == 0 and col == 0:
-                continue
-            
-            # Primera fila: espais de fitxes
-            elif row == 0:
-                pass
-
-            # Primera columna: noms dels jugadors
-            elif col == 0:
-                name = player_names[row - 1]
-                color = get_player_color(name)
-                render_centered_text(player_grid_surface, font_small, name, 
-                                     (center_x, center_y), color, DARK_GREEN)
     
     update_player_grid()
 
@@ -281,25 +293,41 @@ def update_player_grid():
 
     for row in range(1, rows):
         center_y = c_1h + c_h * (row - 0.5)
-        player_name = player_names[row - 1]
+        name = player_names[row - 1]
         for col in range(1, cols):
             center_x = c_1w + c_w * (col - 0.5)
-            amount = players[player_name]["chips"][f"{chip_values[col - 1]:03}"]
-            render_centered_text(player_grid_surface, font_small, f"× {str(amount)}", 
-                                 (center_x, center_y), WHITE, DARK_GREEN)
 
-def draw_chip(chip_dict):
+            color = DARK_RED if players[name]["creditless"] else DARK_GREEN
+            
+            x = center_x - c_w * 0.5
+            y = center_y - c_h * 0.5
+            draw.rect(player_grid_surface, color, [x+2, y+2, c_w-3, c_h-4])
+
+            amount = players[name]["chips"][f"{chip_values[col - 1]:03}"]
+            render_centered_text(player_grid_surface, font_small, f"× {str(amount)}", 
+                                 (center_x, center_y), WHITE)
+
+
+def draw_chip(chip_dict, silhouette=False):
     """Dibuixa una fitxa a partir del seu diccionari."""
     value = int(chip_dict["value"])
-    owner = chip_dict["owner"]
     pos = tuple(chip_dict['pos'].values())
     radius = chip_dict["radius"]
 
-    bg_color = get_player_color(owner)
-    color = tuple(c / 2 for c in bg_color)
+    if silhouette:
+        polygon_color1 = DARK_GREEN
+        polygon_color2 = tuple(c * 7/5 for c in polygon_color1)
+        color = tuple(c * 9/10 for c in polygon_color1)
+        bg_color = tuple(c * 7/6 for c in polygon_color1)
+    else:
+        owner = chip_dict["owner"]
+        bg_color = get_player_color(owner)
+        color = tuple(c / 2 for c in bg_color)
 
-    draw.circle(screen, bg_color, pos, radius)
-    render_centered_text(screen, font_tiny, str(value), pos, color)
+    surface = player_grid_surface if silhouette else screen
+
+    draw.circle(surface, bg_color, pos, radius)
+    render_centered_text(surface, font_tiny, str(value), pos, color)
 
     # Patró decoratiu
     for i in range(8):    
@@ -311,8 +339,11 @@ def draw_chip(chip_dict):
         p2 = utils.point_on_circle(pos, radius-1, angle)
         p3 = utils.point_on_circle(pos, radius*2/3, angle)
 
-        polygon_color = LIGHT_GRAY if i % 2 == 0 else DARK_GRAY
-        draw.polygon(screen, polygon_color, [p0,p1,p2,p3])  
+        if silhouette:
+            polygon_color = polygon_color2 if i % 2 == 0 else polygon_color1
+        else:
+            polygon_color = LIGHT_GRAY if i % 2 == 0 else DARK_GRAY
+        draw.polygon(surface, polygon_color, [p0,p1,p2,p3])  
 
     # Vores
     border_width = 2
@@ -320,8 +351,8 @@ def draw_chip(chip_dict):
     if value >= 50:
         border_width += 1
         inner_border_width += 1
-    draw.circle(screen, color, pos, radius, border_width)
-    draw.circle(screen, color, pos, radius*2/3, inner_border_width)   
+    draw.circle(surface, color, pos, radius, border_width)
+    draw.circle(surface, color, pos, radius*2/3, inner_border_width)   
 
 # Mode 'info'
 

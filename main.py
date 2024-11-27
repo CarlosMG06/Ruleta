@@ -118,6 +118,8 @@ def app_run():
             move_chips_towards_destination()
         else:
             next_round()
+            if any(players[name]["creditless"] for name in player_names):
+                init_player_grid()
             if current_mode["game_over"]:
                 init_game_over_screen()
     elif current_mode["info"]:
@@ -184,22 +186,6 @@ def app_draw():
 
     # Dibuixar graella dels jugadors
     screen.blit(player_grid_surface, (player_grid["x"], player_grid["y"]))
-    
-    # Muestra regiones del tablero a partir de sus Rect
-    """
-    for board_cell in board_cell_areas:
-        color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
-        rect_values = (board_cell_areas[board_cell]['rect']['x'], board_cell_areas[board_cell]['rect']['y'], board_cell_areas[board_cell]['rect']['width'], board_cell_areas[board_cell]['rect']['height'])
-        pygame.draw.rect(screen, color, rect_values, 3)
-        if board_cell in ("0", "column 1", "column 2", "column 3"):
-            pygame.draw.polygon(screen, color, board_cell_areas[board_cell]['vertices'], 3)
-    """
-
-    # Muestra los centros de las posiciones originales de las fichas
-    '''for chip in chips_positions:
-        center = (chips_positions[chip]['x'], chips_positions[chip]['y'])
-        color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
-        pygame.draw.circle(screen, color, center, 5)'''
         
     # Dibuixar fitxes
     for name in player_names:

@@ -17,6 +17,7 @@ def init_players():
             starting_chips_dict[chip_value] = chip_amount
         players[name]["chips"] = starting_chips_dict
         players[name]["credit"] = total_credit_player(name)
+        players[name]["creditless"] = False
 
 def total_credit_player(player_name):
     """Retorna el crèdit total que té el jugador, a partir de les seves fitxes."""
@@ -296,11 +297,15 @@ def next_round():
         redistribute_player_chips(name)
     log_round_info()
     
+    for name in player_names:
+        if players[name]["credit"] == 0:
+            players[name]["creditless"] = True
+
     delay(int(new_round_delay["wait_time"]*1000/2)) # Esperar un segon abans d'esborrar les fitxes
     for name in player_names:
         chips[name].clear()
 
-    if all(players[name]["credit"] == 0 for name in player_names):
+    if all(players[name]["creditless"] for name in player_names):
         game_over()
     else:
         change_mode()
