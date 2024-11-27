@@ -40,8 +40,8 @@ def change_roulette_state(cancel_spin = False):
         roulette["states"][main_states[new_state_index]] = True
 
 def next_round():
+    hand_out_prizes()
     log_game_info()
-    give_out_prizes()
     for name in player_names:
         redistribute_player_chips(name)
     change_mode()
@@ -83,29 +83,28 @@ def readjust_roulette():
 
 def init_players():
     '''Inicia el diccionario que contiene información de los jugadores.'''
-    starting_chips = list(zip(chip_values, (0,1,1,2,2))) # Las tuplas son: (NomFicha, Cantidad)
+    starting_chips = list(zip(chip_values, (0,1,1,2,2))) # Las tuplas son: (NomFicha, Cantidad
     for name in player_names:
-        player_dict = {}
+        starting_chips_dict = {}
         for chip in starting_chips:
             chip_value = f'{chip[0]:03}'
             chip_amount = chip[1]
-            player_dict[chip_value] = chip_amount
-        players[name] = player_dict
+            starting_chips_dict[chip_value] = chip_amount
+        players[name]["chips"] = starting_chips_dict
+        players[name]["credit"] = total_credit_player(name)
 
-def total_money_player(player_name):
+def total_credit_player(player_name):
     '''Devuelve el dinero total que tiene el jugador, a partir de sus fichas'''
-    total_money = 0
-    for chip in players[player_name]:
-        chip_value = int(chip)
-        n_chips = players[player_name][chip]
-        total_money += chip_value * n_chips
-    return total_money
+    total_credit = 0
+    for chip_value, chip_amount in players[player_name]["chips"].items():
+        total_credit += int(chip_value) * chip_amount
+    return total_credit
 
 def redistribute_player_chips(player_name):
     '''Redistribuye las fichas que tiene un jugador para asegurar que tiene la mayor variedad de fichas posibles'''
     global players
     new_chips_dict = {'100': 0, '050': 0, '020': 0, '010': 0, '005': 0}
-    player_money = total_money_player(player_name)
+    player_credit = players[player_name]["credit"]
     new_chips_total = 0
 
     def limit_proportion(chip_value):
@@ -117,12 +116,12 @@ def redistribute_player_chips(player_name):
             case 5: return 1 # Sense límit
 
     for chip_value in chip_values:
-        limit = int(limit_proportion(chip_value) * (player_money - new_chips_total) / chip_value)
-        while player_money >= new_chips_total + chip_value and new_chips_dict[f"{chip_value:03}"] < limit:
+        limit = int(limit_proportion(chip_value) * (player_credit - new_chips_total) / chip_value)
+        while player_credit >= new_chips_total + chip_value and new_chips_dict[f"{chip_value:03}"] < limit:
             new_chips_dict[f"{chip_value:03}"] += 1
             new_chips_total += chip_value
 
-    players[player_name] = new_chips_dict
+    players[player_name]["chips"] = new_chips_dict
 
 def valid_chip_position(chip_index, chip, cell):
     '''Comprueba que la ficha puesta en el tablero de apuestas está en posición válida (True, False).
@@ -156,7 +155,7 @@ def init_chip_positions():
 def init_chips(): 
     chips[current_player["name"]].clear()
     for value in chip_values:
-        amount = players[current_player["name"]][f"{value:03}"]
+        amount = players[current_player["name"]]["chips"][f"{value:03}"]
         for _ in range(amount):
             chip_dict = {}
             chip_dict['value'] = value
@@ -190,15 +189,17 @@ def release_all_chips():
 def confirm_bet():
     bet_dict = {}
     units = 0
-    for chip in chips[current_player["name"]]:
+    cur_p_name = current_player["name"]
+    for chip in chips[cur_p_name]:
         bet_dict["bet_on"] = chip["current_cell"]
         units += chip["value"]
-        players[current_player["name"]][f"{chip["value"]:03}"] -= 1
+        players[cur_p_name]["chips"][f"{chip["value"]:03}"] -= 1
+    players[cur_p_name]["credit"] = total_credit_player(cur_p_name)
     bet_dict["units"] = units
-    current_bets.append(bet_dict)
+    current_bets[cur_p_name] = bet_dict
 
 def was_bet_correct(player_name):
-    bet_dict = current_bets[player_names.index(player_name)]
+    bet_dict = current_bets[player_name]
     bet_on = bet_dict["bet_on"]
     n = current_number["n"]
     
@@ -215,14 +216,27 @@ def was_bet_correct(player_name):
             case "BLACK": return order_i % 2 == 0
             case "RED":   return order_i % 2 == 1
 
-def give_out_prizes():
-    pass
+def hand_out_prizes():
+    for i, (player_name, bet_dict) in enumerate(current_bets.items()): 
+        if was_bet_correct(player_name):
+            bet_units = bet_dict["units"]
+            prize = bet_units # Retornar les unitats apostades
+
+            bet_on = bet_dict["bet_on"]
+            if bet_on.isdigit():
+                prize += bet_units * 35
+            elif "column" in bet_on:
+                prize += bet_units * 2
+            else:
+                prize += bet_units
+            
+            players[player_name]["credit"] += prize
 
 def log_game_info():
     round_info = {
         "result": current_number["n"],
         "bets": current_bets.copy(),
-        "credits": [total_money_player(name) for name in player_names]
+        "credits": [players[name]["credit"] for name in player_names]
     }
     game_info.append(round_info)
 
@@ -261,6 +275,7 @@ def all_chips_arrived():
 
 def move_chips():
     '''Mueve cada una de las fichas del array 'chips' a la posición que le toca.'''
+    chip_speed = 2
     for name in player_names:
         for chip in chips[name]:
             if not chip['dest']['arrived']:

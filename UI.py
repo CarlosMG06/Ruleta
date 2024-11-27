@@ -305,7 +305,7 @@ def update_player_grid():
             
             # Quantitats de fitxes de cada jugador
             else:
-                amount = players[player_names[row-1]][f"{chip_values[col-1]:03}"]
+                amount = players[player_names[row-1]]["chips"][f"{chip_values[col-1]:03}"]
                 text = font_small.render(f"× {str(amount)}", True, WHITE, DARK_GREEN)
                 text_rect = text.get_rect(center=(center_x,center_y))
                 player_grid_surface.blit(text, text_rect)
@@ -402,7 +402,7 @@ def update_game_info_chart():
         text_result_rect = text_result.get_rect(center = (40, y))
         gi_chart_surface.blit(text_result, text_result_rect)
 
-        for i, bet_dict in enumerate(round_info["bets"]):
+        for i, bet_dict in enumerate(round_info["bets"].values()):
             x = 120 + 80 * i
             text_chips = font_small_thin.render(f"{bet_dict["units"]} units", True, WHITE, DARK_GRAY)
             text_chips_rect = text_chips.get_rect(center = (x, y - 10))
