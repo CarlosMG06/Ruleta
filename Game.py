@@ -134,9 +134,17 @@ def confirm_bet():
     players[cur_p_name]["credit"] = total_credit_player(cur_p_name)
     current_bets[cur_p_name] = bet_list
 
+def first_player():
+    """El primer torn de la ronda serà per al primer jugador amb crèdit."""
+    while True:
+        if not players[current_player["name"]]["creditless"]:
+            break
+        current_player["index"] += 1
+        current_player["name"] = player_names[current_player["index"]]
+
 def next_player():
-    """Passa el torn al següent jugador amb crèdit. 
-    Si en alguna iteració ha comprovat el primer jugador, canvia de mode. En cas contrari, inicialitza les fitxes del jugador amb crèdit nou."""
+    """Passa el torn al següent jugador amb crèdit i inicialitza les seves fitxes.
+    Si torna al primer jugador, canvia de mode."""
     changed_mode = False
     while True:
         current_player["index"] += 1
@@ -145,10 +153,9 @@ def next_player():
         
         if current_player["index"] == 0:
             change_mode()
-            changed_mode = True
-        if players[current_player["name"]]["credit"] > 0:
-            if not changed_mode:
-                init_chips()
+            break
+        if not players[current_player["name"]]["creditless"]:
+            init_chips()
             break
 
 def change_mode(to_info = False, to_game_over = False):

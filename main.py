@@ -60,6 +60,7 @@ def app_run():
     if new_round_delay["bool"]:
         new_round_delay["timer"] += delta_time
         if new_round_delay["timer"] >= new_round_delay["wait_time"]:
+            first_player()
             init_chips()
             new_round_delay["timer"] = 0
             new_round_delay["bool"] = False 
@@ -82,7 +83,6 @@ def app_run():
                 bet_button["pressed"] = False
                 delete_unmoved_chips()
                 confirm_bet()
-                update_player_grid()
                 next_player()                  
         elif bet_button["pressed"]:
             bet_button["pressed"] = False
@@ -156,6 +156,7 @@ def app_draw():
     screen.fill(DARK_GREEN)
     
     if roulette["states"]["idle"]:
+        update_player_grid()
         if spin_counter["n"] > 0:
             # Dibuixar el número actual si la ruleta no està girant i s'ha girat una vegada com a mínim
             draw_current_number()
