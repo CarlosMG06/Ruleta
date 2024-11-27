@@ -5,6 +5,8 @@ from pygame.transform import rotate
 import utils
 import math
 
+# Fonts
+
 font.init()
 font_tiny = font.SysFont("Arial", 12, bold=True)
 font_small = font.SysFont("Arial", 15, bold=True)
@@ -15,14 +17,7 @@ font_big_thin = font.SysFont("Arial", 24)
 font_huge = font.SysFont("Arial", 45, bold=True)
 font_serif = font.SysFont("Times New Roman", 21)
 
-def get_roulette_number_color(i):
-    """Retorna el color corresponent al número en funció del seu índex."""
-    if i == 0:
-        return GREEN
-    elif i % 2 == 1:
-        return RED
-    else:
-        return BLACK
+# Mode 'roulette'
 
 def update_current_number():
     """Actualitza el número actual basant-se en la seva posició angular."""
@@ -32,12 +27,6 @@ def update_current_number():
         if angle + prev_angle < 360/37:
             current_number["n"] = n
             break
-
-def draw_current_number_panel(fill_color):
-    """Dibuixa el panell central la ruleta que mostra el nñumero actual."""
-    r = roulette["radius"]
-    draw.rect(roulette_surface, fill_color, (r-40, r-40, 80, 80))
-    draw.rect(roulette_surface, GOLD, (r-40, r-40, 80, 80), 5)
 
 def draw_current_number():
     """Dibuixa el número actual dins el panell central de la ruleta."""
@@ -99,37 +88,24 @@ def update_roulette():
         render_centered_text(roulette_surface, font_small, str(n),
                              polygon_center, WHITE, rotation_angle=text_angle)
 
-def get_button_colors(button):
-    """Calcula els colors d'un botó segons el seu estat."""
-    if button["pressed"]:
-        return GOLD, BLACK, BLACK
-    elif not button["enabled"]:
-        return DARK_GRAY, GRAY, GRAY
-    else:
-        return BLACK, LIGHT_GRAY, WHITE
+# Funcions auxiliars ruleta
 
-def draw_button(button, spin_button=False, close_button=False):
-    """Dibuixa un botó segons el seu estat fent servir el seu diccionari."""
-    b_rect_tuple = (button["x"], button["y"], button["width"], button["height"])
-    fill_color, border_color, text_color = get_button_colors(button)
-
-    draw.rect(screen, fill_color, b_rect_tuple)
-    width = button["height"]//15
-    draw.rect(screen, border_color, b_rect_tuple, width)
-    
-    if close_button:
-        # Icona de tancar
-        p0 = (button["x"] + 4, button["y"] + 4)
-        p1 = (button["x"] + button["width"] - 6, button["y"] + button["height"] - 5)
-        p2 = (p0[0], p1[1])
-        p3 = (p1[0], p0[1])
-        draw.line(screen, text_color, p0, p1, 4)
-        draw.line(screen, text_color, p2, p3, 4)
+def get_roulette_number_color(i):
+    """Retorna el color corresponent al número en funció del seu índex."""
+    if i == 0:
+        return GREEN
+    elif i % 2 == 1:
+        return RED
     else:
-        # Text
-        b_font = font_big if spin_button else font_medium
-        center = (button["x"] + button["width"]/2, button["y"] + button["height"]/2)
-        render_centered_text(screen, b_font, button["string"], center, text_color)
+        return BLACK
+
+def draw_current_number_panel(fill_color):
+    """Dibuixa el panell central la ruleta que mostra el nñumero actual."""
+    r = roulette["radius"]
+    draw.rect(roulette_surface, fill_color, (r-40, r-40, 80, 80))
+    draw.rect(roulette_surface, GOLD, (r-40, r-40, 80, 80), 5)
+
+# Mode 'betting' i 'moving_chips'
 
 def init_betting_grid():
     """Inicialitza la graella principal de la taula d'apostes."""
@@ -344,6 +320,8 @@ def draw_chip(chip_dict):
     draw.circle(screen, color, pos, radius, border_width)
     draw.circle(screen, color, pos, radius*2/3, inner_border_width)   
 
+# Mode 'info'
+
 def init_game_info_chart():
     """Inicialitza les parts estàtiques de la pantalla de la informació de la partida."""
     # Finestra
@@ -383,14 +361,7 @@ def init_game_info_chart():
                 subcol_x = col_pos["col_x"] + 80 * (j - 1)
                 render_centered_text(gi_surface, font_small, name, 
                                      (subcol_x, subcol_y), color, None)
-
-def get_player_color(name):
-    """Retorna el color associat al jugador."""
-    match name:
-        case "taronja": return ORANGE
-        case "blau": return BLUE
-        case "lila": return PURPLE
-                
+            
 def update_game_info_chart():
     """Actualitza la graella de la informació de la partida."""
     width = game_info_chart["width"]
@@ -429,13 +400,17 @@ def update_game_info_chart():
     else:
         gi_surface.blit(gi_chart_surface, (game_info_chart["x"], game_info_chart["y"]))
 
-def render_centered_text(surface, font, text, position, color, bg_color=None, rotation_angle=None):
-    """Renderitza i dibuixa text centrat en una posició específica."""
-    rendered_text = font.render(text, True, color, bg_color)
-    if rotation_angle:
-        rendered_text = rotate(rendered_text, rotation_angle)
-    text_rect = rendered_text.get_rect(center=position)
-    surface.blit(rendered_text, text_rect)
+def draw_scroll():
+    """Dibuixa el scroll en funció del percentatge."""
+    rect_tuple = (gi_scroll["x"], gi_scroll["y"], gi_scroll["width"], gi_scroll["height"])
+    draw.rect(screen, GRAY, rect_tuple)
+
+    circle_x = int(gi_scroll["x"] + gi_scroll["width"] / 2)
+    circle_y = int(gi_scroll["y"] + (gi_scroll["percentage"] / 100) * gi_scroll["height"])
+    circle_tuple = (circle_x, circle_y)
+    draw.circle(screen, WHITE, circle_tuple, gi_scroll["radius"])
+
+# Funcions auxiliars info
 
 def show_game_info():
     """Mostra la informació de la partida."""
@@ -448,12 +423,53 @@ def hide_game_info():
     """Amaga la informació de la partida."""
     game_info_chart["visible"] = False
 
-def draw_scroll():
-    """Dibuixa el scroll en funció del percentatge."""
-    rect_tuple = (gi_scroll["x"], gi_scroll["y"], gi_scroll["width"], gi_scroll["height"])
-    draw.rect(screen, GRAY, rect_tuple)
+# Botons
 
-    circle_x = int(gi_scroll["x"] + gi_scroll["width"] / 2)
-    circle_y = int(gi_scroll["y"] + (gi_scroll["percentage"] / 100) * gi_scroll["height"])
-    circle_tuple = (circle_x, circle_y)
-    draw.circle(screen, WHITE, circle_tuple, gi_scroll["radius"])
+def get_button_colors(button):
+    """Calcula els colors d'un botó segons el seu estat."""
+    if button["pressed"]:
+        return GOLD, BLACK, BLACK
+    elif not button["enabled"]:
+        return DARK_GRAY, GRAY, GRAY
+    else:
+        return BLACK, LIGHT_GRAY, WHITE
+
+def draw_button(button, spin_button=False, close_button=False):
+    """Dibuixa un botó segons el seu estat fent servir el seu diccionari."""
+    b_rect_tuple = (button["x"], button["y"], button["width"], button["height"])
+    fill_color, border_color, text_color = get_button_colors(button)
+
+    draw.rect(screen, fill_color, b_rect_tuple)
+    width = button["height"]//15
+    draw.rect(screen, border_color, b_rect_tuple, width)
+    
+    if close_button:
+        # Icona de tancar
+        p0 = (button["x"] + 4, button["y"] + 4)
+        p1 = (button["x"] + button["width"] - 6, button["y"] + button["height"] - 5)
+        p2 = (p0[0], p1[1])
+        p3 = (p1[0], p0[1])
+        draw.line(screen, text_color, p0, p1, 4)
+        draw.line(screen, text_color, p2, p3, 4)
+    else:
+        # Text
+        b_font = font_big if spin_button else font_medium
+        center = (button["x"] + button["width"]/2, button["y"] + button["height"]/2)
+        render_centered_text(screen, b_font, button["string"], center, text_color)
+
+# Funcions auxiliars generals
+
+def get_player_color(name):
+    """Retorna el color associat al jugador."""
+    match name:
+        case "taronja": return ORANGE
+        case "blau": return BLUE
+        case "lila": return PURPLE
+
+def render_centered_text(surface, font, text, position, color, bg_color=None, rotation_angle=None):
+    """Renderitza i dibuixa text centrat en una posició específica."""
+    rendered_text = font.render(text, True, color, bg_color)
+    if rotation_angle:
+        rendered_text = rotate(rendered_text, rotation_angle)
+    text_rect = rendered_text.get_rect(center=position)
+    surface.blit(rendered_text, text_rect)

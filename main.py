@@ -12,9 +12,6 @@ from Game import *
 pygame.init()
 clock = pygame.time.Clock()
 
-screen = pygame.display.set_mode((800, 450))
-pygame.display.set_caption('Window Title')
-
 # Bucle de l'aplicació
 def main():
     is_looping = True
@@ -116,7 +113,7 @@ def app_run():
             readjust_roulette()
     elif current_mode["moving_chips"]:
         if not all_chips_arrived():
-            move_chips()
+            move_chips_towards_destination()
         else:
             next_round()
     else:
